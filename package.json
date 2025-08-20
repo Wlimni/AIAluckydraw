@@ -1,0 +1,56 @@
+{
+  "name": "aia-lucky-draw-system",
+  "version": "1.0.0",
+  "description": "Professional interactive lottery system for AIA Insurance sales incentive programs with spectacular animations and preset results",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "serve": "python3 -m http.server 8000"
+  },
+  "keywords": [
+    "lottery",
+    "aia",
+    "insurance",
+    "sales",
+    "incentive",
+    "animation",
+    "javascript",
+    "css3",
+    "html5",
+    "confetti",
+    "prize",
+    "drawing",
+    "gambling",
+    "enterprise"
+  ],
+  "author": {
+    "name": "AIA Development Team"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/yourusername/AIAluckydraw.git"
+  },
+  "bugs": {
+    "url": "https://github.com/yourusername/AIAluckydraw/issues"
+  },
+  "homepage": "https://github.com/yourusername/AIAluckydraw#readme",
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "browserslist": [
+    "Chrome >= 80",
+    "Firefox >= 75",
+    "Safari >= 13",
+    "Edge >= 80"
+  ],
+  "files": [
+    "index.html",
+    "css/",
+    "js/",
+    "assets/",
+    "README.md",
+    "LICENSE"
+  ]
+}

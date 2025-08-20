@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIA Lucky Draw Wheel</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <!-- AIA Logo in top right corner -->
+    <img src="assets/pic/aialogo.jpeg" alt="AIA Logo" class="top-right-logo">
+    
+    <div class="container">
+      <h1>AIA Sales Reward Lottery</h1>
+      <div class="blocks-container" id="blocks-container">
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$100 Cash Prize">💵 $100 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$500 Cash Prize">💰 $500 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$100 Cash Prize">💵 $100 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+      </div>
+      
+      <!-- Results Summary Box - Moved up after cells -->
+      <div id="results-summary" class="results-box hidden">
+        <h2>🏆 Prize Summary</h2>
+        <div class="results-grid">
+          <div class="prize-counts" id="prize-counts"></div>
+          <div class="total-summary" id="total-summary">
+            <div class="total-winnings">
+              <p>💰 Total Winnings</p>
+              <h2>$<span id="total-amount">0</span></h2>
+            </div>
+            <div class="tickets-drawn">
+              <p>🎫 Tickets Drawn</p>
+              <h2><span id="tickets-drawn">0</span></h2>
+            </div>
+          </div>
+        </div>
+        <button id="new-draw-btn" class="secondary-btn">Draw Another Player</button>
+      </div>
+      
+      <button id="draw-btn">Draw All Tickets!</button>
+      <div id="winner"></div>
+      <div class="player-info">
+        <div class="current-player">
+          <span>Current Player: <strong id="player-name">Select Player</strong></span>
+          <span>Remaining Tickets: <strong id="remaining-tickets">/</strong></span>
+        </div>
+        <select id="player-select">
+          <option value="">Select a player...</option>
+          <option value="john-25">John Smith (25 tickets)</option>
+          <option value="mary-63">Mary Johnson (63 tickets)</option>
+          <option value="david-12">David Lee (12 tickets)</option>
+          <option value="sarah-45">Sarah Wilson (45 tickets)</option>
+          <option value="mike-8">Mike Brown (8 tickets)</option>
+          <option value="lisa-32">Lisa Davis (32 tickets)</option>
+        </select>
+      </div>
+      <div id="confetti-container"></div>
+    </div>
+    <script src="js/sales-lottery.js"></script>
+  </body>
+</html>
