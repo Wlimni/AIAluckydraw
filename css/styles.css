@@ -135,15 +135,16 @@ h1 {
     color: #1a1a1a;
     font-size: 3.2em;
     font-weight: 800;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    background: linear-gradient(135deg, #f87171, #ef4444, #fca5a5);
+    text-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
+    background: linear-gradient(135deg, #ffd700, #ffb347, #ff6b35, #d946ef);
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
     letter-spacing: -0.02em;
     line-height: 1.1;
     position: relative;
-    animation: titleGlow 3s ease-in-out infinite alternate;
+    animation: luckyGlow 2s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
 }
 
 h1::after {
@@ -152,33 +153,38 @@ h1::after {
     bottom: -12px;
     left: 50%;
     transform: translateX(-50%);
-    width: 80px;
+    width: 160px; /* Made much longer */
     height: 4px;
-    background: linear-gradient(90deg, #ffd700, #ffb347);
+    background: linear-gradient(90deg, #ffd700, #ffb347, #ffd700);
     border-radius: 2px;
-    opacity: 0.6;
-    animation: underlineGlow 3s ease-in-out infinite alternate;
+    opacity: 0.8;
+    animation: luckyUnderlineGlow 2s ease-in-out infinite alternate;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
 }
 
-@keyframes titleGlow {
+@keyframes luckyGlow {
     0% { 
-        filter: drop-shadow(0 0 5px rgba(248, 113, 113, 0.3));
+        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4)) drop-shadow(0 0 30px rgba(255, 179, 71, 0.2));
         transform: scale(1);
+        text-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
     }
     100% { 
-        filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.6));
-        transform: scale(1.01);
+        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 50px rgba(255, 179, 71, 0.4));
+        transform: scale(1.02);
+        text-shadow: 0 6px 24px rgba(255, 215, 0, 0.5);
     }
 }
 
-@keyframes underlineGlow {
+@keyframes luckyUnderlineGlow {
     0% { 
-        box-shadow: 0 0 5px rgba(255, 215, 0, 0.4);
-        opacity: 0.6;
+        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 179, 71, 0.3);
+        opacity: 0.8;
+        transform: translateX(-50%) scaleX(1);
     }
     100% { 
-        box-shadow: 0 0 12px rgba(255, 179, 71, 0.8);
-        opacity: 0.9;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 179, 71, 0.5);
+        opacity: 1;
+        transform: translateX(-50%) scaleX(1.05);
     }
 }
 
