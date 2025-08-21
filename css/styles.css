@@ -147,6 +147,17 @@ h1 {
     filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
 }
 
+/* AIA letters in red with red glow */
+h1 .aia-red {
+    background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+    filter: drop-shadow(0 0 15px rgba(239, 68, 68, 0.5));
+    animation: aiaRedGlow 2s ease-in-out infinite alternate;
+}
+
 h1::after {
     content: '';
     position: absolute;
@@ -172,6 +183,17 @@ h1::after {
         filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 50px rgba(255, 179, 71, 0.4));
         transform: scale(1.02);
         text-shadow: 0 6px 24px rgba(255, 215, 0, 0.5);
+    }
+}
+
+@keyframes aiaRedGlow {
+    0% { 
+        filter: drop-shadow(0 0 10px rgba(239, 68, 68, 0.4)) drop-shadow(0 0 20px rgba(220, 38, 38, 0.2));
+        text-shadow: 0 4px 16px rgba(239, 68, 68, 0.4);
+    }
+    100% { 
+        filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.7)) drop-shadow(0 0 40px rgba(220, 38, 38, 0.4));
+        text-shadow: 0 6px 24px rgba(239, 68, 68, 0.6);
     }
 }
 
