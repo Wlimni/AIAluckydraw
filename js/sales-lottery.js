@@ -69,6 +69,11 @@ class SalesLottery {
         const newDrawBtn = document.getElementById('new-draw-btn');
         
         playerSelect.addEventListener('change', (e) => {
+            // Prevent player selection changes during drawing
+            if (this.isDrawing) {
+                e.preventDefault();
+                return;
+            }
             this.selectPlayer(e.target.value);
         });
         
@@ -77,6 +82,8 @@ class SalesLottery {
         });
         
         newDrawBtn.addEventListener('click', () => {
+            // Prevent resetting during drawing
+            if (this.isDrawing) return;
             this.resetForNewDraw();
         });
     }
@@ -121,6 +128,9 @@ class SalesLottery {
         if (player.remaining <= 0) return;
         
         this.isDrawing = true;
+        
+        // Disable all controls during drawing
+        this.disableControlsDuringDrawing();
         
         // Get the draw button for explosion animation
         const drawButton = document.getElementById('draw-btn');
@@ -579,6 +589,8 @@ class SalesLottery {
             // Keep light beam for a bit longer after drawing completes
             setTimeout(() => {
                 document.getElementById('results-summary').classList.remove('drawing');
+                // Re-enable all controls after drawing is complete
+                this.enableControlsAfterDrawing();
             }, 2000); // Light beam continues for 2 more seconds
             this.isDrawing = false;
         }, 2000);
@@ -688,6 +700,50 @@ class SalesLottery {
         
         // Show results box
         resultsBox.classList.remove('hidden');
+    }
+    
+    // Disable controls during drawing to prevent interference
+    disableControlsDuringDrawing() {
+        const playerSelect = document.getElementById('player-select');
+        const newDrawBtn = document.getElementById('new-draw-btn');
+        
+        // Disable player selection dropdown
+        if (playerSelect) {
+            playerSelect.disabled = true;
+            playerSelect.style.opacity = '0.5';
+            playerSelect.style.cursor = 'not-allowed';
+        }
+        
+        // Disable "Draw another player" button
+        if (newDrawBtn) {
+            newDrawBtn.disabled = true;
+            newDrawBtn.style.opacity = '0.5';
+            newDrawBtn.style.cursor = 'not-allowed';
+            newDrawBtn.style.background = '#9ca3af'; // Grey background
+            newDrawBtn.style.borderColor = '#9ca3af';
+        }
+    }
+    
+    // Re-enable controls after drawing is complete
+    enableControlsAfterDrawing() {
+        const playerSelect = document.getElementById('player-select');
+        const newDrawBtn = document.getElementById('new-draw-btn');
+        
+        // Re-enable player selection dropdown
+        if (playerSelect) {
+            playerSelect.disabled = false;
+            playerSelect.style.opacity = '1';
+            playerSelect.style.cursor = 'pointer';
+        }
+        
+        // Re-enable "Draw another player" button
+        if (newDrawBtn) {
+            newDrawBtn.disabled = false;
+            newDrawBtn.style.opacity = '1';
+            newDrawBtn.style.cursor = 'pointer';
+            newDrawBtn.style.background = ''; // Reset to original style
+            newDrawBtn.style.borderColor = '';
+        }
     }
     
     resetForNewDraw() {
