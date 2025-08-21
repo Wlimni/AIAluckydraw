@@ -78,6 +78,17 @@ class SalesLottery {
         });
         
         drawBtn.addEventListener('click', () => {
+            console.log('Draw button clicked - attempting to stop pre-drawing animation');
+            
+            // Stop pre-drawing animation immediately when draw starts
+            if (window.blocksLottery && window.blocksLottery.stopPreDrawingAnimation) {
+                console.log('Calling stopPreDrawingAnimation...');
+                window.blocksLottery.stopPreDrawingAnimation();
+                console.log('stopPreDrawingAnimation called');
+            } else {
+                console.warn('blocksLottery or stopPreDrawingAnimation method not found on window object');
+            }
+            
             this.startBulkDraw();
         });
         
@@ -118,6 +129,18 @@ class SalesLottery {
             document.getElementById('draw-btn').style.display = 'block';
             document.getElementById('draw-btn').disabled = player.remaining <= 0;
             document.getElementById('winner').textContent = '';
+            
+            // Only start pre-drawing animation if it's not already running
+            if (window.blocksLottery && window.blocksLottery.startPreDrawingAnimation) {
+                // Check if pre-drawing is already active
+                if (!window.blocksLottery.isPreDrawing) {
+                    setTimeout(() => {
+                        window.blocksLottery.startPreDrawingAnimation();
+                    }, 100); // Small delay to ensure DOM updates
+                } else {
+                    console.log('Pre-drawing animation already running, not restarting');
+                }
+            }
         }
     }
     
@@ -126,6 +149,16 @@ class SalesLottery {
         
         const player = this.players[this.currentPlayer];
         if (player.remaining <= 0) return;
+        
+        console.log('startBulkDraw called - ensuring pre-drawing animation is stopped');
+        
+        // Stop pre-drawing animation immediately
+        if (window.blocksLottery && window.blocksLottery.stopPreDrawingAnimation) {
+            console.log('Calling stopPreDrawingAnimation from startBulkDraw...');
+            window.blocksLottery.stopPreDrawingAnimation();
+        } else {
+            console.warn('blocksLottery not available in startBulkDraw');
+        }
         
         this.isDrawing = true;
         
@@ -729,6 +762,18 @@ class SalesLottery {
         const playerSelect = document.getElementById('player-select');
         const newDrawBtn = document.getElementById('new-draw-btn');
         
+        // Clean up all animation classes from all blocks
+        const blocks = document.querySelectorAll('.block');
+        blocks.forEach(block => {
+            block.classList.remove('highlight', 'rolling', 'golden-win', 'fast-draw', 'slow-draw', 'pre-highlight', 'pre-highlight-2');
+        });
+        
+        // Clean up container classes
+        const container = document.getElementById('blocks-container');
+        if (container) {
+            container.classList.remove('drawing', 'pre-drawing');
+        }
+        
         // Re-enable player selection dropdown
         if (playerSelect) {
             playerSelect.disabled = false;
@@ -744,9 +789,14 @@ class SalesLottery {
             newDrawBtn.style.background = ''; // Reset to original style
             newDrawBtn.style.borderColor = '';
         }
+        
+        console.log('All drawing animations and classes cleaned up');
     }
     
     resetForNewDraw() {
+        // First ensure all animations and drawing state is cleaned up
+        this.enableControlsAfterDrawing();
+        
         document.getElementById('results-summary').classList.add('hidden');
         document.getElementById('winner').textContent = ''; // Clear winner message together
         
@@ -758,8 +808,14 @@ class SalesLottery {
         document.getElementById('player-select').value = '';
         this.selectPlayer('');
         
-        // Clear confetti
-        document.getElementById('confetti-container').innerHTML = '';
+        // Start pre-drawing animation for new draw session only if not already running
+        if (window.blocksLottery && window.blocksLottery.startPreDrawingAnimation) {
+            if (!window.blocksLottery.isPreDrawing) {
+                setTimeout(() => {
+                    window.blocksLottery.startPreDrawingAnimation();
+                }, 200); // Small delay to ensure cleanup is complete
+            }
+        }
     }
     
     showMassiveConfetti() {

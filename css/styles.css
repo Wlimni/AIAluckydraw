@@ -92,18 +92,24 @@ body::after {
         margin-bottom: 30px;
     }
     
+    .title-row {
+        gap: 10px;
+        flex-direction: column;
+        align-items: center;
+    }
+    
     .title-badge {
-        font-size: 12px;
-        padding: 5px 14px;
-        margin-bottom: 15px;
+        padding: 8px 16px;
     }
     
     .aia-logo {
         font-size: 14px;
     }
     
-    .company-text {
-        font-size: 11px;
+    .subtitle-external {
+        font-size: 12px;
+        text-align: center;
+        margin-top: 5px;
     }
     
     .title-line-1 {
@@ -115,10 +121,9 @@ body::after {
         letter-spacing: 0.01em;
     }
     
+    /* Hide old styles */
     .subtitle {
-        font-size: 0.8em;
-        padding: 5px 10px;
-        margin-top: 10px;
+        display: none;
     }
 }
 
@@ -215,23 +220,36 @@ h1 {
     margin-top: 0;
     position: relative;
     z-index: 100;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
-/* Company badge at the top */
+/* Container for AIA badge and external subtitle */
+.title-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+/* Company badge at the top - rounded rectangle style */
 .title-badge {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    justify-content: center;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
     backdrop-filter: blur(20px);
     border: 2px solid rgba(239, 68, 68, 0.25);
     border-radius: 25px;
-    padding: 10px 22px;
-    margin-bottom: 20px;
-    margin-top: 0;
+    padding: 10px 20px;
     box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(239, 68, 68, 0.1);
     transform: translateY(0);
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 .title-badge:hover {
@@ -250,9 +268,63 @@ h1 {
     text-shadow: 0 1px 4px rgba(239, 68, 68, 0.2);
 }
 
+/* External subtitle outside the badge - grey color */
+.subtitle-external {
+    font-size: 14px;
+    font-weight: 500;
+    color: #6b7280;
+    white-space: nowrap;
+    position: relative;
+}
+
+/* Golden line under external subtitle */
+.subtitle-external::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 5%, #ffd700 20%, #ffb347 50%, #ffd700 80%, transparent 95%);
+    border-radius: 1px;
+    opacity: 0.7;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+}
+
 .title-separator {
     color: #ef4444;
     font-size: 10px;
+}
+
+.title-separator-gold {
+    color: #ffd700;
+    font-size: 18px;
+    font-weight: 300;
+    margin: 0 12px;
+    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.subtitle-inline {
+    font-size: 13px;
+    font-weight: 600;
+    background: linear-gradient(135deg, #ffd700, #ffb347, #ffd700);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 4px rgba(255, 215, 0, 0.3);
+    white-space: nowrap;
+    /* Fallback for browsers that don't support background-clip */
+    color: #ffd700 !important;
+    /* Ensure it appears golden and not grey */
+    filter: drop-shadow(0 0 4px rgba(255, 215, 0, 0.4));
+    position: relative;
+    overflow: visible;
+    flex-shrink: 0;
+}
+
+/* Ensure no golden line appears under the inline subtitle */
+.subtitle-inline::after {
+    display: none !important;
 }
 
 .company-text {
@@ -1880,6 +1952,34 @@ h1 .gold-box {
 
 .block.slow-draw {
     animation: slowDraw 0.25s ease-in-out infinite;
+}
+
+/* Pre-drawing animation - one red highlight moving in pattern like drawing */
+.block.pre-highlight {
+    background: linear-gradient(145deg, #f87171, #ef4444) !important;
+    color: white !important;
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 
+        0 0 32px rgba(248, 113, 113, 0.8),
+        0 0 64px rgba(239, 68, 68, 0.4),
+        0 12px 32px rgba(248, 113, 113, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid #fff !important;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Second red highlight - identical styling for interactions */
+.block.pre-highlight-2 {
+    background: linear-gradient(145deg, #f87171, #ef4444) !important;
+    color: white !important;
+    transform: translateY(-4px) scale(1.05) !important;
+    box-shadow: 
+        0 0 32px rgba(248, 113, 113, 0.8),
+        0 0 64px rgba(239, 68, 68, 0.4),
+        0 12px 32px rgba(248, 113, 113, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    border: 2px solid #fff !important;
+    transition: all 0.3s ease-in-out;
 }
 
 /* Button explosion animation */

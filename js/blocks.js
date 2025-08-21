@@ -46,6 +46,179 @@ class BlocksLottery {
         this.isDrawing = false;
     }
 
+    startPreDrawingAnimation() {
+        console.log('Starting pre-drawing animation');
+        
+        // Guard: Don't start if already running
+        if (this.isPreDrawing || this.preDrawingInterval) {
+            console.log('Pre-drawing animation already running, skipping start');
+            return;
+        }
+        
+        // Set flag to indicate pre-drawing is active
+        this.isPreDrawing = true;
+        
+        // Add pre-drawing class to container
+        this.blocksContainer.classList.add('pre-drawing');
+        
+        // Initialize pattern system with two highlights
+        this.currentPatternIndex = 0;
+        this.patternStepCount = 0;
+        this.redHighlight1Index = 0;
+        this.redHighlight2Index = 0;
+        
+        // Define multiple movement patterns - mix of single and dual red highlights
+        this.movementPatterns = [
+            // Single red patterns
+            {
+                type: 'single',
+                red1: [0, 1, 2, 3, 4, 5, 6, 7, 8],  // Linear flow
+                description: 'Linear Flow'
+            },
+            {
+                type: 'single', 
+                red1: [0, 1, 2, 5, 8, 7, 6, 3, 4],  // Border clockwise
+                description: 'Border Clockwise'
+            },
+            {
+                type: 'single',
+                red1: [4, 1, 4, 3, 4, 5, 4, 7, 4, 0, 4, 2, 4, 6, 4, 8],  // Center focus
+                description: 'Center Focus'
+            },
+            
+            // Dual red patterns
+            {
+                type: 'dual',
+                red1: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                red2: [6, 7, 8, 0, 1, 2, 3, 4, 5],  // Chasing
+                description: 'Chasing Dance'
+            },
+            {
+                type: 'dual',
+                red1: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+                red2: [8, 7, 6, 5, 4, 3, 2, 1, 0],  // Mirror
+                description: 'Mirror Dance'
+            },
+            {
+                type: 'dual',
+                red1: [0, 2, 6, 8, 4],
+                red2: [1, 3, 7, 5, 4],  // Dancing alternating
+                description: 'Alternating Dance'
+            },
+            
+            // More single patterns
+            {
+                type: 'single',
+                red1: [0, 3, 1, 4, 2, 5, 6, 7, 8],  // Wave pattern
+                description: 'Beautiful Wave'
+            },
+            {
+                type: 'single',
+                red1: [0, 2, 8, 6, 4, 1, 7, 3, 5],  // Random elegant jumps
+                description: 'Elegant Jumps'
+            },
+            
+            // More dual patterns  
+            {
+                type: 'dual',
+                red1: [0, 1, 2, 3, 4],
+                red2: [8, 7, 6, 5, 4],  // Converging
+                description: 'Converging Hearts'
+            },
+            {
+                type: 'dual',
+                red1: [0, 1, 2, 5, 8, 7, 6, 3, 4],  // Outside spiral
+                red2: [4, 3, 6, 7, 8, 5, 2, 1, 0],  // Inside spiral
+                description: 'Spiral Chase'
+            }
+        ];
+        
+        // Start the pattern animation loop (slower timing)
+        this.preDrawingInterval = setInterval(() => {
+            this.movePreHighlightWithPattern();
+        }, 600); // Slower: 600ms between moves
+        
+        this.movePreHighlightWithPattern();
+    }
+
+    stopPreDrawingAnimation() {
+        console.log('Stopping pre-drawing animation');
+        
+        // Clear the interval first
+        if (this.preDrawingInterval) {
+            clearInterval(this.preDrawingInterval);
+            this.preDrawingInterval = null;
+            console.log('Pre-drawing interval cleared');
+        }
+        
+        // Set flag to false
+        this.isPreDrawing = false;
+        
+        // Remove pre-drawing class from container
+        if (this.blocksContainer) {
+            this.blocksContainer.classList.remove('pre-drawing');
+        }
+        
+        // Remove all pre-highlight classes from all blocks
+        const allBlocks = this.blocksContainer.querySelectorAll('.block');
+        allBlocks.forEach(block => {
+            block.classList.remove('pre-highlight', 'pre-highlight-2');
+        });
+        
+        console.log('Pre-drawing animation completely stopped and all highlights cleared');
+    }
+
+    movePreHighlightWithPattern() {
+        // Remove highlight from all blocks
+        this.blocks.forEach(block => block.classList.remove('pre-highlight', 'pre-highlight-2'));
+        
+        // Get current pattern
+        const currentPattern = this.movementPatterns[this.currentPatternIndex];
+        
+        console.log(`${currentPattern.description} (${currentPattern.type}) - Step ${this.patternStepCount}`);
+        
+        // Handle single or dual red highlights based on pattern type
+        const red1Pattern = currentPattern.red1;
+        
+        if (this.patternStepCount < red1Pattern.length) {
+            const red1Index = red1Pattern[this.patternStepCount];
+            if (this.blocks[red1Index]) {
+                this.blocks[red1Index].classList.add('pre-highlight');
+            }
+        }
+        
+        // Only add second red if this is a dual pattern
+        if (currentPattern.type === 'dual' && currentPattern.red2) {
+            const red2Pattern = currentPattern.red2;
+            if (this.patternStepCount < red2Pattern.length) {
+                const red2Index = red2Pattern[this.patternStepCount];
+                if (this.blocks[red2Index] && red2Index !== red1Pattern[this.patternStepCount]) {
+                    this.blocks[red2Index].classList.add('pre-highlight-2');
+                }
+            }
+        }
+        
+        // Move to next step in current pattern
+        this.patternStepCount++;
+        
+        // If we've completed the current pattern, switch to next pattern
+        const maxLength = currentPattern.red2 ? 
+            Math.max(red1Pattern.length, currentPattern.red2.length) : 
+            red1Pattern.length;
+            
+        if (this.patternStepCount >= maxLength) {
+            this.patternStepCount = 0;
+            this.currentPatternIndex = (this.currentPatternIndex + 1) % this.movementPatterns.length;
+            const nextPattern = this.movementPatterns[this.currentPatternIndex];
+            console.log(`Switching to: ${nextPattern.description} (${nextPattern.type})`);
+            
+            // Add a brief pause between patterns (longer pause)
+            setTimeout(() => {
+                // Continue with next pattern after pause
+            }, 1200); // Longer pause between patterns
+        }
+    }
+
     async showPreDrawAnimation() {
         return new Promise(resolve => {
             // Add pre-draw animation to all blocks
