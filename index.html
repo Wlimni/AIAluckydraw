@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AIA Sales Lottery System</title>
+    <title>AIA Sales Lottery - Player Selection</title>
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
@@ -19,62 +19,60 @@
           <div class="subtitle-external">Win Amazing Cash Prizes • Live Drawing System</div>
         </div>
         <h1 class="main-title">
-          <span class="title-line-1">🏆 Sales Excellence</span>
+          <span class="title-line-1"><span class="trophy">🏆</span> <span class="corporate-text">Corporate Solutions</span> <span class="trophy">🏆</span></span>
           <span class="title-line-2">REWARD LOTTERY</span>
         </h1>
       </div>
-      <div class="blocks-container" id="blocks-container">
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$100 Cash Prize">💵 $100 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$500 Cash Prize">💰 $500 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$100 Cash Prize">💵 $100 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-      </div>
       
-      <!-- Results Summary Box - Moved up after cells -->
-      <div id="results-summary" class="results-box hidden">
-        <h2>🏆 Prize Summary</h2>
-        <div class="results-grid">
-          <div class="prize-counts" id="prize-counts"></div>
-          <div class="total-summary" id="total-summary">
-            <div class="total-winnings">
-              <p>💰 Total Winnings</p>
-              <h2>$<span id="total-amount">0</span></h2>
-            </div>
-            <div class="tickets-drawn">
-              <p>🎫 Tickets Drawn</p>
-              <h2><span id="tickets-drawn">0</span></h2>
+      <!-- Player Selection Page Content -->
+      <div class="selection-container" id="selection-container">
+        <div class="selection-step">
+          <h2 class="step-title">Step 1: Select Working Group</h2>
+          
+          <!-- Group Search Controls -->
+          <div class="search-controls">
+            <div class="search-box">
+              <input type="text" id="group-search" placeholder="🔍 Search groups..." />
             </div>
           </div>
+          
+          <div class="group-grid" id="group-grid">
+            <!-- Groups will be populated dynamically -->
+          </div>
         </div>
-        <button id="new-draw-btn" class="secondary-btn">Draw Another Player</button>
+        
+        <div class="selection-step" id="player-step" style="display: none;">
+          <h2 class="step-title">Step 2: Select Worker</h2>
+          <div class="selected-group-info">
+            <span>Selected Group: <strong id="selected-group-name">None</strong></span>
+          </div>
+          
+          <!-- Player Search -->
+          <div class="player-search-controls">
+            <div class="search-box">
+              <input type="text" id="player-search" placeholder="🔍 Search workers..." />
+            </div>
+          </div>
+          
+          <div class="player-grid" id="player-grid">
+            <!-- Players will be populated based on selected group -->
+          </div>
+          
+          <div class="pagination" id="pagination" style="display: none;">
+            <button id="prev-page" class="pagination-btn">← Previous</button>
+            <span id="page-info">Page 1 of 1</span>
+            <button id="next-page" class="pagination-btn">Next →</button>
+          </div>
+        </div>
+        
+        <div class="selection-controls">
+          <button id="back-btn" class="secondary-btn" style="display: none;">← Back to Groups</button>
+          <button id="proceed-btn" class="exciting-btn" style="display: none;"><span style="font-size: 1.5em;">🎯</span> Proceed to Drawing!</button>
+        </div>
       </div>
       
-      <button id="draw-btn">Draw All Tickets!</button>
-      <div id="winner"></div>
-      <div class="player-info">
-        <div class="current-player">
-          <span>Current Player: <strong id="player-name">Select Player</strong></span>
-          <span>Remaining Tickets: <strong id="remaining-tickets">/</strong></span>
-        </div>
-        <select id="player-select">
-          <option value="">Select a player...</option>
-          <option value="john-25">John Smith (25 tickets)</option>
-          <option value="mary-63">Mary Johnson (63 tickets)</option>
-          <option value="david-12">David Lee (12 tickets)</option>
-          <option value="sarah-45">Sarah Wilson (45 tickets)</option>
-          <option value="mike-8">Mike Brown (8 tickets)</option>
-          <option value="lisa-32">Lisa Davis (32 tickets)</option>
-        </select>
-      </div>
       <div id="confetti-container"></div>
     </div>
-    <script src="js/blocks.js"></script>
-    <script src="js/app.js"></script>
-    <script src="js/sales-lottery.js"></script>
+    <script src="js/player-selection.js"></script>
   </body>
 </html>

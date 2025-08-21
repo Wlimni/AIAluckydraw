@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AIA Sales Lottery - Drawing</title>
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <!-- AIA Logo in top right corner -->
+    <img src="assets/pic/aialogo.jpeg" alt="AIA Logo" class="top-right-logo">
+    
+    <div class="container">
+      <div class="title-section">
+        <div class="title-row">
+          <div class="title-badge">
+            <span class="aia-logo">AIA</span>
+          </div>
+          <div class="subtitle-external">Win Amazing Cash Prizes • Live Drawing System</div>
+        </div>
+        <h1 class="main-title">
+          <span class="title-line-1"><span class="trophy">🏆</span> <span class="corporate-text">Corporate Solutions</span> <span class="trophy">🏆</span></span>
+          <span class="title-line-2">REWARD LOTTERY</span>
+        </h1>
+      </div>
+      
+      <div class="blocks-container" id="blocks-container">
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$100 Cash Prize">💵 $100 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$500 Cash Prize">💰 $500 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <div class="block" data-name="$100 Cash Prize">💵 $100 Cash</div>
+        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+      </div>
+      
+      <!-- Results Summary Box - Moved up after cells -->
+      <div id="results-summary" class="results-box hidden">
+        <h2>🏆 Prize Summary</h2>
+        <div class="results-grid">
+          <div class="prize-counts" id="prize-counts"></div>
+          <div class="total-summary" id="total-summary">
+            <div class="total-winnings">
+              <p>💰 Total Winnings</p>
+              <h2>$<span id="total-amount">0</span></h2>
+            </div>
+            <div class="tickets-drawn">
+              <p>🎫 Tickets Drawn</p>
+              <h2><span id="tickets-drawn">0</span></h2>
+            </div>
+          </div>
+        </div>
+        <button id="new-draw-btn" class="secondary-btn">Draw Another Player</button>
+      </div>
+      
+      <div class="draw-btn-wrapper">
+        <div class="left-arrow">Press >>>>></div>
+        <button id="draw-btn">Draw All Tickets!</button>
+        <div class="right-arrow"><<<<<  Press</div>
+      </div>
+      <div id="winner"></div>
+      <div class="player-info">
+        <div class="current-player">
+          <span>Current Player: <strong id="player-name">Loading...</strong></span>
+          <span>Remaining Tickets: <strong id="remaining-tickets">/</strong></span>
+        </div>
+        <div class="drawing-controls">
+          <button id="back-to-selection" class="secondary-btn">← Back to Selection</button>
+        </div>
+      </div>
+      <div id="confetti-container"></div>
+    </div>
+    <script src="js/blocks.js"></script>
+    <script src="js/sales-lottery.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/drawing-page.js"></script>
+  </body>
+</html>
