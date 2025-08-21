@@ -86,19 +86,70 @@ body::after {
 
 /* Add right side decorative element - REMOVED */
 
+/* Responsive design for mobile devices */
+@media (max-width: 768px) {
+    .title-section {
+        margin-bottom: 30px;
+    }
+    
+    .title-badge {
+        font-size: 12px;
+        padding: 5px 14px;
+        margin-bottom: 15px;
+    }
+    
+    .aia-logo {
+        font-size: 14px;
+    }
+    
+    .company-text {
+        font-size: 11px;
+    }
+    
+    .title-line-1 {
+        font-size: 1em;
+    }
+    
+    .title-line-2 {
+        font-size: 1.3em;
+        letter-spacing: 0.01em;
+    }
+    
+    .subtitle {
+        font-size: 0.8em;
+        padding: 5px 10px;
+        margin-top: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .title-line-1 {
+        font-size: 0.9em;
+    }
+    
+    .title-line-2 {
+        font-size: 1.1em;
+    }
+    
+    .subtitle {
+        font-size: 0.75em;
+    }
+}
+
 .container {
     text-align: center;
     max-width: 950px;
     width: 100%;
-    padding: 40px;
-    background: rgba(255, 255, 255, 0.95);
+    padding: 20px 40px 40px 40px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%);
     border-radius: 32px;
     box-shadow: 
         0 32px 64px rgba(0, 0, 0, 0.12),
         0 16px 32px rgba(0, 0, 0, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+        inset 0 1px 0 rgba(255, 255, 255, 0.9),
+        inset 0 0 0 1px rgba(255, 255, 255, 0.4);
     backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     position: relative;
 }
@@ -130,24 +181,150 @@ body::after {
     transform: translateY(-4px);
 }
 
+/* Ensure title section remains visible during drawing */
+.container.drawing .title-section {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+}
+
+.container.drawing .title-section * {
+    opacity: 1;
+    visibility: visible;
+}
+
 h1 {
     margin-bottom: 48px;
     color: #1a1a1a;
     font-size: 3.2em;
     font-weight: 800;
-    text-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
-    background: linear-gradient(135deg, #ffd700, #ffb347, #ff6b35, #d946ef);
-    -webkit-background-clip: text;
-    background-clip: text;
-    -webkit-text-fill-color: transparent;
     letter-spacing: -0.02em;
     line-height: 1.1;
     position: relative;
-    animation: luckyGlow 2s ease-in-out infinite alternate;
-    filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.4));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 15px;
 }
 
-/* AIA letters in red with red glow */
+/* New attractive title section */
+.title-section {
+    text-align: center;
+    margin-bottom: 40px;
+    margin-top: 0;
+    position: relative;
+    z-index: 100;
+}
+
+/* Company badge at the top */
+.title-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.95));
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(239, 68, 68, 0.25);
+    border-radius: 25px;
+    padding: 10px 22px;
+    margin-bottom: 20px;
+    margin-top: 0;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(239, 68, 68, 0.1);
+    transform: translateY(0);
+    transition: all 0.3s ease;
+}
+
+.title-badge:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(239, 68, 68, 0.15);
+    border-color: rgba(239, 68, 68, 0.35);
+}
+
+.aia-logo {
+    font-size: 16px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 1px 4px rgba(239, 68, 68, 0.2);
+}
+
+.title-separator {
+    color: #ef4444;
+    font-size: 10px;
+}
+
+.company-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Main title redesign */
+.main-title {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.title-line-1 {
+    font-size: 1.2em;
+    font-weight: 600;
+    background: linear-gradient(135deg, #ffd700, #ffb347, #ff8c00);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+    filter: drop-shadow(0 1px 4px rgba(255, 140, 0, 0.2));
+    animation: goldGlow 3s ease-in-out infinite alternate;
+    letter-spacing: 0;
+}
+
+.title-line-2 {
+    font-size: 1.6em;
+    font-weight: 800;
+    background: linear-gradient(135deg, #1e293b, #334155, #475569);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 12px rgba(30, 41, 59, 0.3);
+    letter-spacing: 0.02em;
+    position: relative;
+}
+
+/* Subtitle */
+.subtitle {
+    font-size: 0.95em;
+    font-weight: 500;
+    color: #6b7280;
+    margin-top: 12px;
+    position: relative;
+    display: inline-block;
+}
+
+.subtitle::after {
+    content: '';
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, transparent 5%, #ffd700 20%, #ffb347 50%, #ffd700 80%, transparent 95%);
+    border-radius: 1px;
+    opacity: 0.7;
+    box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
+}
+
+/* Animations */
+@keyframes goldGlow {
+    0% { filter: drop-shadow(0 2px 8px rgba(255, 140, 0, 0.3)); }
+    100% { filter: drop-shadow(0 4px 16px rgba(255, 140, 0, 0.6)); }
+}
+
+/* Old h1 styles removed - keeping this for legacy support */
 h1 .aia-red {
     background: linear-gradient(135deg, #ef4444, #dc2626, #b91c1c);
     -webkit-background-clip: text;
@@ -158,32 +335,16 @@ h1 .aia-red {
     animation: aiaRedGlow 2s ease-in-out infinite alternate;
 }
 
-h1::after {
-    content: '';
-    position: absolute;
-    bottom: -12px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 160px; /* Made much longer */
-    height: 4px;
-    background: linear-gradient(90deg, #ffd700, #ffb347, #ffd700);
-    border-radius: 2px;
-    opacity: 0.8;
-    animation: luckyUnderlineGlow 2s ease-in-out infinite alternate;
-    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
-}
-
-@keyframes luckyGlow {
-    0% { 
-        filter: drop-shadow(0 0 15px rgba(255, 215, 0, 0.4)) drop-shadow(0 0 30px rgba(255, 179, 71, 0.2));
-        transform: scale(1);
-        text-shadow: 0 4px 16px rgba(255, 215, 0, 0.3);
-    }
-    100% { 
-        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 50px rgba(255, 179, 71, 0.4));
-        transform: scale(1.02);
-        text-shadow: 0 6px 24px rgba(255, 215, 0, 0.5);
-    }
+/* Gold box for "Sales Reward Lottery" */
+h1 .gold-box {
+    background: linear-gradient(135deg, #ffd700, #ffb347, #ffd700);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 15px;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4);
+    animation: goldBoxShine 2s ease-in-out infinite alternate;
+    border: 2px solid rgba(255, 255, 255, 0.3);
 }
 
 @keyframes aiaRedGlow {
@@ -197,16 +358,16 @@ h1::after {
     }
 }
 
-@keyframes luckyUnderlineGlow {
+@keyframes goldBoxShine {
     0% { 
-        box-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 20px rgba(255, 179, 71, 0.3);
-        opacity: 0.8;
-        transform: translateX(-50%) scaleX(1);
+        background: linear-gradient(135deg, #ffd700, #ffb347, #ffd700);
+        box-shadow: 0 4px 20px rgba(255, 215, 0, 0.4), 0 0 30px rgba(255, 179, 71, 0.2);
+        transform: scale(1);
     }
     100% { 
-        box-shadow: 0 0 20px rgba(255, 215, 0, 0.8), 0 0 40px rgba(255, 179, 71, 0.5);
-        opacity: 1;
-        transform: translateX(-50%) scaleX(1.05);
+        background: linear-gradient(135deg, #fff200, #ffd700, #fff200);
+        box-shadow: 0 6px 30px rgba(255, 215, 0, 0.7), 0 0 50px rgba(255, 179, 71, 0.4);
+        transform: scale(1.02);
     }
 }
 
@@ -236,7 +397,7 @@ h1::after {
     position: relative;
     overflow: hidden;
     user-select: none;
-    border: 2px solid rgba(248, 113, 113, 0.1);
+    border: 2px solid rgba(0, 0, 0, 0.1);
     letter-spacing: 0.01em;
     line-height: 1.4;
 }
@@ -248,7 +409,7 @@ h1::after {
     left: -100%;
     width: 100%;
     height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.08), transparent);
+    background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.03), transparent);
     transition: left 0.6s ease;
 }
 
@@ -259,7 +420,7 @@ h1::after {
     left: 50%;
     width: 0;
     height: 0;
-    background: radial-gradient(circle, rgba(248, 113, 113, 0.15), transparent 70%);
+    background: radial-gradient(circle, rgba(0, 0, 0, 0.05), transparent 70%);
     border-radius: 50%;
     transform: translate(-50%, -50%);
     transition: all 0.5s ease;
@@ -269,10 +430,10 @@ h1::after {
 .block:hover {
     transform: translateY(-6px) scale(1.02);
     box-shadow: 
-        0 12px 32px rgba(248, 113, 113, 0.15),
+        0 12px 32px rgba(0, 0, 0, 0.1),
         0 6px 16px rgba(0, 0, 0, 0.1),
         inset 0 1px 0 rgba(255, 255, 255, 1);
-    border-color: rgba(248, 113, 113, 0.3);
+    border-color: rgba(0, 0, 0, 0.2);
 }
 
 .block:hover::before {
@@ -283,6 +444,48 @@ h1::after {
     width: 120px;
     height: 120px;
     opacity: 1;
+}
+
+/* $500 Prize - Golden Shine */
+.block[data-name*="$500"] {
+    border: 2px solid rgba(255, 215, 0, 0.3);
+}
+
+.block[data-name*="$500"]::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.15), transparent);
+}
+
+.block[data-name*="$500"]::after {
+    background: radial-gradient(circle, rgba(255, 215, 0, 0.2), transparent 70%);
+}
+
+.block[data-name*="$500"]:hover {
+    box-shadow: 
+        0 12px 32px rgba(255, 215, 0, 0.25),
+        0 6px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    border-color: rgba(255, 215, 0, 0.5);
+}
+
+/* $100 Prize - Red Shine */
+.block[data-name*="$100"] {
+    border: 2px solid rgba(248, 113, 113, 0.3);
+}
+
+.block[data-name*="$100"]::before {
+    background: linear-gradient(90deg, transparent, rgba(248, 113, 113, 0.15), transparent);
+}
+
+.block[data-name*="$100"]::after {
+    background: radial-gradient(circle, rgba(248, 113, 113, 0.2), transparent 70%);
+}
+
+.block[data-name*="$100"]:hover {
+    box-shadow: 
+        0 12px 32px rgba(248, 113, 113, 0.25),
+        0 6px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    border-color: rgba(248, 113, 113, 0.5);
 }
 
 .block.highlight {
@@ -1664,7 +1867,7 @@ h1::after {
 
 .block.golden-win {
     animation: goldenWin 0.3s ease-out forwards;
-    border: 3px solid #ffd700;
+    border: 2px solid #fff;
     color: #000;
     font-weight: 800;
     text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);

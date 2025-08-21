@@ -27,6 +27,9 @@ class BlocksLottery {
         this.winnerElement.textContent = '';
         this.clearPreviousWinner();
         
+        // Show pre-draw animation on all blocks
+        await this.showPreDrawAnimation();
+        
         // Play spin sound if available
         if (this.audioEnabled && this.spinSound) {
             this.spinSound.currentTime = 0;
@@ -41,6 +44,23 @@ class BlocksLottery {
         this.showWinner(winner);
         
         this.isDrawing = false;
+    }
+
+    async showPreDrawAnimation() {
+        return new Promise(resolve => {
+            // Add pre-draw animation to all blocks
+            this.blocks.forEach(block => {
+                block.classList.add('pre-draw');
+            });
+            
+            // Let the animation play for 3 seconds, then remove it
+            setTimeout(() => {
+                this.blocks.forEach(block => {
+                    block.classList.remove('pre-draw');
+                });
+                resolve();
+            }, 3000); // 3 seconds to match the CSS animation duration
+        });
     }
 
     clearPreviousWinner() {
