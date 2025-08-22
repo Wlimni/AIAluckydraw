@@ -1330,28 +1330,45 @@ h1 .gold-box {
 }
 
 .prize-item {
-    display: flex;
+    display: flex; /* Back to flex for better alignment */
     justify-content: space-between;
     align-items: center;
-    padding: 8px 0;
+    padding: 12px 0;
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     font-weight: 600;
     color: #2d3748;
+    min-height: 60px; /* Fixed height to prevent jumping */
 }
 
 .prize-item:last-child {
     border-bottom: none;
 }
 
+/* Prize name on the left */
+.prize-name {
+    font-size: 14px;
+    line-height: 1.2;
+    flex: 1;
+}
+
+/* Prize count aligned to the right */
+.prize-count {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+}
+
 .prize-item .count {
     background: #f87171;
     color: white;
-    padding: 4px 12px;
+    padding: 6px 14px;
     border-radius: 20px;
     font-size: 14px;
     font-weight: 700;
-    min-width: 40px;
+    min-width: 50px;
     text-align: center;
+    display: inline-block;
+    font-family: 'SF Mono', 'Monaco', 'Cascadia Code', monospace; /* Monospace for better number alignment */
 }
 
 .total-summary {

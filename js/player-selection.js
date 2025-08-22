@@ -15,13 +15,13 @@ class PlayerSelection {
     }
     
     generateGroupData() {
-        // Group-based organization with real worker names
+        // Simple group organization - Group 1 through Group 6
         const groups = {
-            'sales-team': {
-                id: 'sales-team',
-                name: 'Sales Team',
-                icon: '💼',
-                description: 'Sales Representatives & Account Managers',
+            'group-1': {
+                id: 'group-1',
+                name: 'Group 1',
+                icon: '👨‍👩‍👧‍👦',
+                description: 'Team Members',
                 workers: [
                     { name: 'WongKamWing', tickets: 25, employeeId: 'EMP001001' },
                     { name: 'ChanSiuMing', tickets: 50, employeeId: 'EMP001002' },
@@ -37,11 +37,11 @@ class PlayerSelection {
                     { name: 'SitKamPo', tickets: 42, employeeId: 'EMP001012' }
                 ]
             },
-            'marketing-team': {
-                id: 'marketing-team',
-                name: 'Marketing Team',
-                icon: '📢',
-                description: 'Marketing Specialists & Campaign Managers',
+            'group-2': {
+                id: 'group-2',
+                name: 'Group 2',
+                icon: '👨‍👩‍👧‍👦',
+                description: 'Team Members',
                 workers: [
                     { name: 'TangChiKeung', tickets: 40, employeeId: 'EMP002001' },
                     { name: 'YeungSukFan', tickets: 17, employeeId: 'EMP002002' },
@@ -53,11 +53,11 @@ class PlayerSelection {
                     { name: 'CheungSoWah', tickets: 27, employeeId: 'EMP002008' }
                 ]
             },
-            'operations-team': {
-                id: 'operations-team',
-                name: 'Operations Team',
-                icon: '⚙️',
-                description: 'Operations & Support Staff',
+            'group-3': {
+                id: 'group-3',
+                name: 'Group 3',
+                icon: '👨‍👩‍👧‍👦',
+                description: 'Team Members',
                 workers: [
                     { name: 'LamKaYan', tickets: 60, employeeId: 'EMP003001' },
                     { name: 'WuChiHung', tickets: 12, employeeId: 'EMP003002' },
@@ -69,11 +69,11 @@ class PlayerSelection {
                     { name: 'TseungWaiChung', tickets: 44, employeeId: 'EMP003008' }
                 ]
             },
-            'customer-service': {
-                id: 'customer-service',
-                name: 'Customer Service',
-                icon: '🎧',
-                description: 'Customer Support & Relations',
+            'group-4': {
+                id: 'group-4',
+                name: 'Group 4',
+                icon: '👨‍👩‍👧‍👦',
+                description: 'Team Members',
                 workers: [
                     { name: 'MaHokKwan', tickets: 19, employeeId: 'EMP004001' },
                     { name: 'ChuiMingTak', tickets: 64, employeeId: 'EMP004002' },
@@ -84,11 +84,11 @@ class PlayerSelection {
                     { name: 'YungSiuLan', tickets: 24, employeeId: 'EMP004007' }
                 ]
             },
-            'claims-department': {
-                id: 'claims-department',
-                name: 'Claims Department',
-                icon: '📋',
-                description: 'Claims Processing & Assessment',
+            'group-5': {
+                id: 'group-5',
+                name: 'Group 5',
+                icon: '👨‍👩‍👧‍👦',
+                description: 'Team Members',
                 workers: [
                     { name: 'LawKamWah', tickets: 56, employeeId: 'EMP005001' },
                     { name: 'NgaiMeiHong', tickets: 32, employeeId: 'EMP005002' },
@@ -98,11 +98,11 @@ class PlayerSelection {
                     { name: 'LiuSukMei', tickets: 38, employeeId: 'EMP005006' }
                 ]
             },
-            'administration': {
-                id: 'administration',
-                name: 'Administration',
-                icon: '📊',
-                description: 'HR, Finance & Admin Support',
+            'group-6': {
+                id: 'group-6',
+                name: 'Group 6',
+                icon: '👨‍👩‍👧‍👦',
+                description: 'Team Members',
                 workers: [
                     { name: 'ChanWingHo', tickets: 47, employeeId: 'EMP006001' },
                     { name: 'LeeMingYee', tickets: 35, employeeId: 'EMP006002' },
@@ -134,40 +134,58 @@ class PlayerSelection {
     
     setupEventListeners() {
         // Group search
-        document.getElementById('group-search').addEventListener('input', (e) => {
-            this.filterGroups(e.target.value);
-        });
+        const groupSearch = document.getElementById('group-search');
+        if (groupSearch) {
+            groupSearch.addEventListener('input', (e) => {
+                this.filterGroups(e.target.value);
+            });
+        }
         
         // Player search
-        document.getElementById('player-search').addEventListener('input', (e) => {
-            this.filterPlayers(e.target.value);
-        });
+        const playerSearch = document.getElementById('player-search');
+        if (playerSearch) {
+            playerSearch.addEventListener('input', (e) => {
+                this.filterPlayers(e.target.value);
+            });
+        }
         
         // Pagination
-        document.getElementById('prev-page').addEventListener('click', () => {
-            if (this.currentPage > 1) {
-                this.currentPage--;
-                this.displayPlayers();
-            }
-        });
+        const prevPage = document.getElementById('prev-page');
+        if (prevPage) {
+            prevPage.addEventListener('click', () => {
+                if (this.currentPage > 1) {
+                    this.currentPage--;
+                    this.displayPlayers();
+                }
+            });
+        }
         
-        document.getElementById('next-page').addEventListener('click', () => {
-            const totalPages = Math.ceil(this.filteredPlayers.length / this.playersPerPage);
-            if (this.currentPage < totalPages) {
-                this.currentPage++;
-                this.displayPlayers();
-            }
-        });
+        const nextPage = document.getElementById('next-page');
+        if (nextPage) {
+            nextPage.addEventListener('click', () => {
+                const totalPages = Math.ceil(this.filteredPlayers.length / this.playersPerPage);
+                if (this.currentPage < totalPages) {
+                    this.currentPage++;
+                    this.displayPlayers();
+                }
+            });
+        }
         
         // Back button
-        document.getElementById('back-btn').addEventListener('click', () => {
-            this.goBackToGroups();
-        });
+        const backBtn = document.getElementById('back-btn');
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                this.goBackToGroups();
+            });
+        }
         
         // Proceed button
-        document.getElementById('proceed-btn').addEventListener('click', () => {
-            this.proceedToDrawing();
-        });
+        const proceedBtn = document.getElementById('proceed-btn');
+        if (proceedBtn) {
+            proceedBtn.addEventListener('click', () => {
+                this.proceedToDrawing();
+            });
+        }
     }
     
     populateGroupGrid() {
@@ -177,6 +195,10 @@ class PlayerSelection {
     
     displayGroups() {
         const groupGrid = document.getElementById('group-grid');
+        if (!groupGrid) {
+            console.error('Group grid element not found');
+            return;
+        }
         
         groupGrid.innerHTML = this.filteredGroups.map(group => `
             <div class="area-card" data-group="${group.id}">
@@ -216,7 +238,10 @@ class PlayerSelection {
         document.querySelectorAll('.area-card').forEach(card => {
             card.classList.remove('selected');
         });
-        document.querySelector(`[data-group="${groupId}"]`).classList.add('selected');
+        const selectedCard = document.querySelector(`[data-group="${groupId}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
+        }
         
         // Show player selection step
         this.showPlayerStep(group);
@@ -224,22 +249,36 @@ class PlayerSelection {
     }
     
     showPlayerStep(group) {
-        document.getElementById('player-step').style.display = 'block';
-        document.getElementById('back-btn').style.display = 'inline-block';
-        document.getElementById('selected-group-name').textContent = group.name;
+        const playerStep = document.getElementById('player-step');
+        const backBtn = document.getElementById('back-btn');
+        const selectedGroupName = document.getElementById('selected-group-name');
+        
+        if (playerStep) {
+            playerStep.style.display = 'block';
+        }
+        if (backBtn) {
+            backBtn.style.display = 'inline-block';
+        }
+        if (selectedGroupName) {
+            selectedGroupName.textContent = group.name;
+        }
         
         // Reset search
-        document.getElementById('player-search').value = '';
+        const playerSearch = document.getElementById('player-search');
+        if (playerSearch) {
+            playerSearch.value = '';
+        }
         this.currentPage = 1;
         
         // Very smooth scroll to player step with longer duration
         setTimeout(() => {
-            const playerStep = document.getElementById('player-step');
-            playerStep.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start',
-                inline: 'nearest'
-            });
+            if (playerStep) {
+                playerStep.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start',
+                    inline: 'nearest'
+                });
+            }
         }, 150);
     }
     
@@ -251,6 +290,11 @@ class PlayerSelection {
     
     displayPlayers() {
         const playerGrid = document.getElementById('player-grid');
+        if (!playerGrid) {
+            console.error('Player grid element not found');
+            return;
+        }
+        
         const startIndex = (this.currentPage - 1) * this.playersPerPage;
         const endIndex = startIndex + this.playersPerPage;
         const playersToShow = this.filteredPlayers.slice(startIndex, endIndex);
@@ -259,7 +303,6 @@ class PlayerSelection {
             <div class="player-card" data-player="${player.employeeId}">
                 <div class="player-avatar">👤</div>
                 <h3>${player.name}</h3>
-                <div class="employee-id">${player.employeeId}</div>
                 <div class="ticket-info">
                     <div class="ticket-count">
                         <span class="ticket-icon">🎫</span>
@@ -291,12 +334,18 @@ class PlayerSelection {
         const prevBtn = document.getElementById('prev-page');
         const nextBtn = document.getElementById('next-page');
         
-        if (totalPages > 1) {
+        if (paginationDiv && totalPages > 1) {
             paginationDiv.style.display = 'flex';
-            pageInfo.textContent = `Page ${this.currentPage} of ${totalPages}`;
-            prevBtn.disabled = this.currentPage === 1;
-            nextBtn.disabled = this.currentPage === totalPages;
-        } else {
+            if (pageInfo) {
+                pageInfo.textContent = `Page ${this.currentPage} of ${totalPages}`;
+            }
+            if (prevBtn) {
+                prevBtn.disabled = this.currentPage === 1;
+            }
+            if (nextBtn) {
+                nextBtn.disabled = this.currentPage === totalPages;
+            }
+        } else if (paginationDiv) {
             paginationDiv.style.display = 'none';
         }
     }
@@ -347,14 +396,19 @@ class PlayerSelection {
         document.querySelectorAll('.player-card').forEach(card => {
             card.classList.remove('selected');
         });
-        document.querySelector(`[data-player="${employeeId}"]`).classList.add('selected');
+        const selectedCard = document.querySelector(`[data-player="${employeeId}"]`);
+        if (selectedCard) {
+            selectedCard.classList.add('selected');
+        }
         
         // Show proceed button
-        document.getElementById('proceed-btn').style.display = 'inline-block';
+        const proceedBtn = document.getElementById('proceed-btn');
+        if (proceedBtn) {
+            proceedBtn.style.display = 'inline-block';
+        }
         
         // Simple smooth scroll down to make the button visible
         setTimeout(() => {
-            const proceedBtn = document.getElementById('proceed-btn');
             if (proceedBtn) {
                 // Just scroll down to show the button, not center it
                 proceedBtn.scrollIntoView({ 
@@ -379,9 +433,19 @@ class PlayerSelection {
         this.selectedPlayer = null;
         
         // Hide player step
-        document.getElementById('player-step').style.display = 'none';
-        document.getElementById('back-btn').style.display = 'none';
-        document.getElementById('proceed-btn').style.display = 'none';
+        const playerStep = document.getElementById('player-step');
+        const backBtn = document.getElementById('back-btn');
+        const proceedBtn = document.getElementById('proceed-btn');
+        
+        if (playerStep) {
+            playerStep.style.display = 'none';
+        }
+        if (backBtn) {
+            backBtn.style.display = 'none';
+        }
+        if (proceedBtn) {
+            proceedBtn.style.display = 'none';
+        }
         
         // Clear group selections
         document.querySelectorAll('.area-card').forEach(card => {
@@ -389,10 +453,13 @@ class PlayerSelection {
         });
         
         // Scroll back to top
-        document.querySelector('.selection-container').scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'start' 
-        });
+        const selectionContainer = document.querySelector('.selection-container');
+        if (selectionContainer) {
+            selectionContainer.scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'start' 
+            });
+        }
     }
     
     proceedToDrawing() {
@@ -417,18 +484,6 @@ class PlayerSelection {
         
         // Navigate to drawing page
         window.location.href = 'drawing.html';
-    }
-    
-    getTicketLevel(tickets) {
-        if (tickets >= 60) return 'high';
-        if (tickets >= 30) return 'medium';
-        return 'low';
-    }
-    
-    getTicketLevelText(tickets) {
-        if (tickets >= 60) return '⭐⭐⭐ High Volume';
-        if (tickets >= 30) return '⭐⭐ Medium Volume';
-        return '⭐ Standard Volume';
     }
 }
 

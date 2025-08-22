@@ -349,8 +349,10 @@ class SalesLottery {
         // Show the results box immediately but with zero counts
         resultsBox.classList.remove('hidden');
         
-        // Only initialize if we don't already have counters running
-        if (!this.realtimeCounters || Object.keys(this.realtimeCounters).length === 0) {
+        // FIXED: Only initialize if we don't already have counters running AND it's a fresh start
+        if (!this.realtimeCounters || Object.keys(this.realtimeCounters).length === 0 || !this.isDrawing) {
+            console.log('🔄 INITIALIZING COUNTERS: Setting up fresh counters');
+            
             // Initialize display with all possible prizes at 0
             prizeCountsDiv.innerHTML = '';
             this.realtimeCounters = {};
@@ -363,9 +365,10 @@ class SalesLottery {
                 prizeItem.className = 'prize-item';
                 prizeItem.id = `counter-${prize.replace(/\s+/g, '-').replace(/\$/g, '')}`;
                 
+                // FIXED LAYOUT: Separate lines to prevent size changes
                 prizeItem.innerHTML = `
-                    <span>${prize}</span>
-                    <span class="count">0</span>
+                    <div class="prize-name">${prize}</div>
+                    <div class="prize-count"><span class="count">0</span></div>
                 `;
                 prizeCountsDiv.appendChild(prizeItem);
             });
@@ -374,6 +377,10 @@ class SalesLottery {
             document.getElementById('total-amount').textContent = '$0';
             document.getElementById('tickets-drawn').textContent = '0';
             this.realtimeTotalWinnings = 0;
+        } else {
+            console.log('🔄 COUNTERS ALREADY ACTIVE: Preserving existing values');
+            console.log('Current counters:', this.realtimeCounters);
+            console.log('Current total:', this.realtimeTotalWinnings);
         }
         
         console.log('Real-time counters initialized. Total winnings:', this.realtimeTotalWinnings);
