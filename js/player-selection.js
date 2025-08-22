@@ -200,14 +200,19 @@ class PlayerSelection {
             return;
         }
         
+        // Always use list view layout
         groupGrid.innerHTML = this.filteredGroups.map(group => `
             <div class="area-card" data-group="${group.id}">
                 <div class="area-icon">${group.icon}</div>
-                <h3>${group.name}</h3>
-                <p class="group-description">${group.description}</p>
-                <div class="area-stats">
-                    <span class="worker-count">${group.totalWorkers} workers</span>
-                    <span class="ticket-count">${group.totalTickets} tickets</span>
+                <div class="area-card-content">
+                    <div class="group-info">
+                        <h3>${group.name}</h3>
+                        <p class="group-description">${group.description}</p>
+                    </div>
+                    <div class="area-stats">
+                        <span class="worker-count">${group.totalWorkers} workers</span>
+                        <span class="ticket-count">${group.totalTickets} tickets</span>
+                    </div>
                 </div>
             </div>
         `).join('');
