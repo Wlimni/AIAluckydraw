@@ -223,24 +223,18 @@ class SalesLottery {
     }
 
     initializeDrawingState(player) {
+        // Reset continuous movement system
+        this.continuousMovementActive = false;
+        this.remainingPrizes = [];
+        this.currentPrizeIndex = 0;
+        
         // Get predetermined results based on preset or random
         this.actualResults = this.getActualWinningResults(player.tickets);
         
-        // Calculate expected final counts from actualResults for validation
-        this.expectedFinalCounts = {};
-        Object.keys(this.prizeDistribution).forEach(prize => {
-            this.expectedFinalCounts[prize] = 0;
-        });
-        
-        this.actualResults.forEach(prize => {
-            this.expectedFinalCounts[prize]++;
-        });
-        
         console.log(`🎯 Drawing for ${player.name}: ${player.tickets} tickets`);
-        console.log(`📋 Results to animate:`, this.actualResults);
-        console.log(`🎪 Expected final counts:`, this.expectedFinalCounts);
+        console.log(`📋 Results to animate (exact order):`, this.actualResults);
         
-        // Initialize real-time counters
+        // Initialize real-time counters (start from zero, increment with each golden shine)
         this.prizeCounts = {};
         Object.keys(this.prizeDistribution).forEach(prize => {
             this.prizeCounts[prize] = 0;
@@ -280,206 +274,844 @@ class SalesLottery {
             document.querySelector('.container').classList.remove('light-rays');
         }, 2000);
         
-        // Start the actual prize drawing animations
+        // Start the actual prize drawing animations - PROPER LOTTERY STYLE
         setTimeout(() => {
             document.getElementById('results-summary').classList.add('drawing');
-            this.animateSequentialPrizes();
+            this.startProperLotteryAnimation();
         }, 2000);
     }
     
-    animateSequentialPrizes() {
-        const blocks = document.querySelectorAll('.block');
-        let currentPrizeIndex = 0;
+    startProperLotteryAnimation() {
+        console.log(`� Starting PROPER LOTTERY ANIMATION for ${this.actualResults.length} tickets`);
         
-        console.log(`🎯 Starting animation for ${this.actualResults.length} predetermined prizes`);
+        // Initialize lottery state with debugging
+        this.completedDraws = 0;
+        this.currentTicketIndex = 0;
+        this.isAnimatingLottery = true;
+        this.missedShines = 0;
+        this.animationErrors = [];
+        this.expectedResults = this.getResultsBreakdown();
+        this.falseGoldenShines = 0; // Track accidental golden shines
+        this.goldenShineLocked = true; // CRITICAL: Lock all golden shines by default
+        this.authorizedWinningBlock = null; // Only this block can have golden shine
         
-        // Much faster drawing - multiple prizes can be drawn simultaneously
-        const drawNextBatch = () => {
-            // STRICT BOUNDS CHECK: Never exceed actualResults array length
-            if (currentPrizeIndex >= this.actualResults.length) {
-                console.log(`🏁 All ${this.actualResults.length} prizes animated, completing drawing`);
-                setTimeout(() => {
-                    this.completeDrawing();
-                }, 300);
+        console.log(`🎰 Starting PROPER LOTTERY ANIMATION for ${this.actualResults.length} tickets`);
+        console.log(`📋 Expected results breakdown:`, this.expectedResults);
+        console.log(`🔒 GOLDEN SHINE LOCKED: No blocks can shine until authorized`);
+        
+        // Start monitoring system to prevent false golden shines
+        this.startGoldenShineMonitor();
+        
+        // Start the lottery sequence
+        this.executeNextLotteryDraw();
+    }
+    
+    // Monitor for accidental golden shines - SIMPLIFIED for clean system
+    startGoldenShineMonitor() {
+        console.log('🛡️ Starting CLEAN Golden Shine Monitor');
+        
+        this.monitorInterval = setInterval(() => {
+            if (!this.isAnimatingLottery) {
+                clearInterval(this.monitorInterval);
                 return;
             }
             
-            // Draw multiple prizes simultaneously for speed (2-4 at once)
-            const remainingPrizes = this.actualResults.length - currentPrizeIndex;
-            const batchSize = Math.min(3, remainingPrizes);
-            const promises = [];
+            // SIMPLE CHECK: Only remove unauthorized golden shines
+            const allBlocks = document.querySelectorAll('.block');
             
-            console.log(`📦 Processing batch of ${batchSize} prizes (${currentPrizeIndex + 1}-${currentPrizeIndex + batchSize} of ${this.actualResults.length})`);
-            
-            for (let i = 0; i < batchSize; i++) {
-                const prizeIndex = currentPrizeIndex + i;
-                // DOUBLE CHECK: Ensure we don't go out of bounds
-                if (prizeIndex < this.actualResults.length) {
-                    const targetPrize = this.actualResults[prizeIndex];
-                    console.log(`🎲 Drawing prize ${prizeIndex + 1}/${this.actualResults.length}: ${targetPrize}`);
-                    
-                    // Start rolling animation for this prize with slight delay
-                    const promise = new Promise((resolve) => {
-                        setTimeout(() => {
-                            this.rollForPrize(blocks, targetPrize).then(() => {
-                                // Prize won - update counters IMMEDIATELY with validation
-                                this.updatePrizeCounter(targetPrize);
-                                resolve();
-                            });
-                        }, i * 100); // 100ms delay between each in batch
-                    });
-                    promises.push(promise);
+            allBlocks.forEach((block, index) => {
+                if (block.classList.contains('golden-win')) {
+                    // If golden shine is locked OR this isn't the authorized block
+                    if (this.goldenShineLocked || block !== this.authorizedWinningBlock) {
+                        console.warn(`🧹 CLEAN REMOVAL: Unauthorized golden shine on block ${index}`);
+                        block.classList.remove('golden-win');
+                        block.removeAttribute('data-golden-protected');
+                        block.removeAttribute('data-ticket-number');
+                        this.falseGoldenShines++;
+                    }
                 }
-            }
-            
-            // Wait for current batch to complete, then start next batch
-            Promise.all(promises).then(() => {
-                currentPrizeIndex += batchSize;
-                setTimeout(() => {
-                    drawNextBatch();
-                }, 150); // Short delay between batches
             });
-        };
-        
-        // Start the fast batch drawing
-        drawNextBatch();
+        }, 100); // Less frequent checking for cleaner performance
     }
-
-    rollForPrize(blocks, targetPrize) {
+    
+    getResultsBreakdown() {
+        const breakdown = {};
+        this.actualResults.forEach(prize => {
+            breakdown[prize] = (breakdown[prize] || 0) + 1;
+        });
+        return breakdown;
+    }
+    
+    executeNextLotteryDraw() {
+        if (this.currentTicketIndex >= this.actualResults.length) {
+            console.log('🏁 All lottery draws completed!');
+            setTimeout(() => {
+                this.completeDrawing();
+            }, 1000);
+            return;
+        }
+        
+        const ticketNumber = this.currentTicketIndex + 1;
+        const targetPrize = this.actualResults[this.currentTicketIndex];
+        
+        console.log(`� LOTTERY DRAW #${ticketNumber}: Drawing for ${targetPrize}`);
+        
+        // Create a proper lottery draw for this ticket
+        this.performSingleLotteryDraw(targetPrize, ticketNumber).then(() => {
+            // Counter is updated DURING the golden shine, not here
+            // Move to next ticket with proper interval
+            this.currentTicketIndex++;
+            
+            // Schedule next draw - authentic lottery pacing
+            const nextDelay = this.calculateNextDrawDelay();
+            setTimeout(() => {
+                this.executeNextLotteryDraw();
+            }, nextDelay);
+        });
+    }
+    
+    calculateNextDrawDelay() {
+        // MUCH FASTER pacing - reduce all delays significantly
+        const remainingTickets = this.actualResults.length - this.currentTicketIndex;
+        
+        if (remainingTickets > 20) {
+            return 300; // Very fast for large draws (was 800)
+        } else if (remainingTickets > 10) {
+            return 400; // Fast (was 1200)
+        } else if (remainingTickets > 5) {
+            return 500; // Medium (was 1500)
+        } else {
+            return 600; // Still reasonable for final tickets (was 2000)
+        }
+    }
+    
+    performSingleLotteryDraw(targetPrize, ticketNumber) {
         return new Promise((resolve) => {
-            // Find blocks that match this prize
+            console.log(`🎲 Performing lottery draw ${ticketNumber} for ${targetPrize}`);
+            
+            const blocks = document.querySelectorAll('.block');
+            
+            // *** SAFETY CHECK: Clean all blocks before starting new draw ***
+            blocks.forEach(block => {
+                if (!block.hasAttribute('data-golden-protected')) {
+                    block.classList.remove('highlight', 'golden-win', 'pre-highlight', 'rolling', 'fast-draw', 'slow-draw');
+                }
+            });
+            console.log(`🧹 SAFETY: All blocks cleaned before draw ${ticketNumber}`);
+            
+            // Find matching blocks for this prize
             const matchingBlocks = Array.from(blocks).filter(block => 
                 block.getAttribute('data-name') === targetPrize
             );
             
             if (matchingBlocks.length === 0) {
-                console.warn(`No blocks found for prize: ${targetPrize}`);
+                console.warn(`No blocks found for ${targetPrize}`);
                 resolve();
                 return;
             }
             
-            // Choose which specific block will win
-            const winningBlock = this.chooseWinningBlock(matchingBlocks, targetPrize);
-            const blockArray = Array.from(blocks);
-            const winningIndex = blockArray.indexOf(winningBlock);
+            // Choose winning block with distribution logic
+            const winningBlock = this.chooseWinningBlock(matchingBlocks, targetPrize, this.currentTicketIndex);
             
-            let currentIndex = 0;
-            let rollCount = 0;
-            const maxRolls = 3 + Math.floor(Math.random() * 4); // Much faster: 3-6 rolls only
-            let speed = 40; // Much faster starting speed
+            console.log(`🎯 SELECTED WINNER: Block with prize "${targetPrize}" for draw ${ticketNumber}`);
             
-            const roll = () => {
-                // Clear previous highlights
-                blocks.forEach(block => block.classList.remove('highlight'));
+            // *** CRITICAL: Set this as the ONLY authorized block for golden shine ***
+            this.authorizedWinningBlock = winningBlock;
+            console.log(`🔐 AUTHORIZED: Only this specific block can have golden shine for draw ${ticketNumber}`);
+            
+            // Start authentic lottery animation
+            this.animateProperLottery(blocks, winningBlock, ticketNumber).then(() => {
+                // Clear authorization after animation completes
+                this.authorizedWinningBlock = null;
+                console.log(`🔓 CLEARED: Authorization cleared after draw ${ticketNumber}`);
+                resolve();
+            });
+        });
+    }
+    
+    animateProperLottery(blocks, winningBlock, ticketNumber) {
+        return new Promise((resolve) => {
+            console.log(`🎰 Starting CLEAN path animation for ticket ${ticketNumber}`);
+            
+            // CLEAN SIMPLE ANIMATION: Red moves in path, golden shines appear at right moments
+            this.performPathBasedAnimation(blocks, winningBlock, ticketNumber).then(() => {
+                console.log(`✅ CLEAN path animation complete for ticket ${ticketNumber}`);
+                resolve();
+            }).catch((error) => {
+                console.error(`❌ Animation error for ticket ${ticketNumber}:`, error);
+                this.animationErrors.push({ ticket: ticketNumber, error: error.message });
+                resolve(); // Still resolve to continue
+            });
+        });
+    }
+    
+    // CONTINUOUS RED MOVEMENT: 2 reds move randomly and draw prizes when they hit them
+    performPathBasedAnimation(blocks, winningBlock, ticketNumber) {
+        return new Promise((resolve) => {
+            console.log(`🛤️ Starting continuous red movement animation`);
+            
+            // If this is the first draw, initialize the continuous movement system
+            if (!this.continuousMovementActive) {
+                this.initializeContinuousMovement(blocks);
+            }
+            
+            // Wait for this specific prize to be drawn by the moving reds
+            this.waitForPrizeDrawn(winningBlock, ticketNumber).then(() => {
+                resolve();
+            });
+        });
+    }
+    
+    // Initialize continuous movement of 2 red highlights
+    initializeContinuousMovement(blocks) {
+        if (this.continuousMovementActive) return;
+        
+        console.log('🔴 Initializing continuous red movement system');
+        
+        this.continuousMovementActive = true;
+        this.totalBlocks = blocks.length;
+        this.blocks = blocks;
+        
+        // Create tracking for what prizes still need to be drawn
+        this.remainingPrizes = [...this.actualResults]; // Copy of all prizes to draw
+        this.currentPrizeIndex = 0;
+        
+        // Initialize red positions randomly
+        this.redPosition1 = Math.floor(Math.random() * this.totalBlocks);
+        this.redPosition2 = Math.floor(Math.random() * this.totalBlocks);
+        
+        // Ensure different starting positions
+        while (this.redPosition2 === this.redPosition1) {
+            this.redPosition2 = (this.redPosition2 + Math.floor(this.totalBlocks / 3)) % this.totalBlocks;
+        }
+        
+        console.log(`🔴 Red highlights initialized at positions: ${this.redPosition1}, ${this.redPosition2}`);
+        console.log(`🎯 Total prizes to draw: ${this.remainingPrizes.length}`);
+        
+        // Start continuous movement
+        this.startContinuousRedMovement();
+    }
+    
+    // Continuous movement of red highlights
+    startContinuousRedMovement() {
+        const moveReds = () => {
+            if (!this.continuousMovementActive || this.remainingPrizes.length === 0) {
+                console.log('🛑 Stopping red movement - all prizes drawn');
+                this.stopContinuousMovement();
+                return;
+            }
+            
+            // Clean all highlights first
+            this.blocks.forEach(block => {
+                if (!block.hasAttribute('data-final-winner')) {
+                    block.classList.remove('highlight');
+                }
+            });
+            
+            // Move red highlights at different speeds
+            const speed1 = 1; // Slow red
+            const speed2 = 2; // Fast red
+            
+            // Random direction changes occasionally
+            if (Math.random() < 0.1) { // 10% chance to change direction
+                speed1 *= (Math.random() < 0.5 ? 1 : -1);
+            }
+            if (Math.random() < 0.15) { // 15% chance for fast red
+                speed2 *= (Math.random() < 0.5 ? 1 : -1);
+            }
+            
+            this.redPosition1 = (this.redPosition1 + speed1 + this.totalBlocks) % this.totalBlocks;
+            this.redPosition2 = (this.redPosition2 + speed2 + this.totalBlocks) % this.totalBlocks;
+            
+            // Apply red highlights
+            if (!this.blocks[this.redPosition1].hasAttribute('data-final-winner')) {
+                this.blocks[this.redPosition1].classList.add('highlight');
+            }
+            if (!this.blocks[this.redPosition2].hasAttribute('data-final-winner')) {
+                this.blocks[this.redPosition2].classList.add('highlight');
+            }
+            
+            // Check if either red hit a block that needs to draw the current prize
+            this.checkForPrizeDrawing();
+            
+            // Continue movement with random timing
+            const delay = 80 + Math.random() * 60; // 80-140ms between moves
+            setTimeout(moveReds, delay);
+        };
+        
+        moveReds();
+    }
+    
+    // Check if reds hit blocks that should trigger prize drawing
+    checkForPrizeDrawing() {
+        if (this.remainingPrizes.length === 0) return;
+        
+        const currentPrizeNeeded = this.remainingPrizes[0]; // Next prize to draw
+        
+        // Check both red positions
+        const red1Block = this.blocks[this.redPosition1];
+        const red2Block = this.blocks[this.redPosition2];
+        
+        const red1Prize = red1Block.getAttribute('data-name');
+        const red2Prize = red2Block.getAttribute('data-name');
+        
+        // If either red is on a block that matches the current needed prize
+        if (red1Prize === currentPrizeNeeded || red2Prize === currentPrizeNeeded) {
+            const triggerBlock = (red1Prize === currentPrizeNeeded) ? red1Block : red2Block;
+            const redPosition = (red1Prize === currentPrizeNeeded) ? this.redPosition1 : this.redPosition2;
+            
+            console.log(`✨ RED HIT TARGET: Position ${redPosition} hit ${currentPrizeNeeded}!`);
+            
+            // Remove this prize from remaining list
+            this.remainingPrizes.shift();
+            const ticketNumber = this.currentPrizeIndex + 1;
+            this.currentPrizeIndex++;
+            
+            // Trigger golden shine immediately
+            this.triggerCleanGoldenShine(triggerBlock, ticketNumber, currentPrizeNeeded);
+        }
+    }
+    
+    // Wait for a specific prize to be drawn by the continuous system
+    waitForPrizeDrawn(winningBlock, ticketNumber) {
+        return new Promise((resolve) => {
+            const prizeName = winningBlock.getAttribute('data-name');
+            console.log(`⏳ Waiting for ${prizeName} to be drawn by moving reds...`);
+            
+            // Check periodically if this prize has been drawn
+            const checkInterval = setInterval(() => {
+                // Check if this prize is no longer in the remaining list
+                const prizeStillNeeded = this.remainingPrizes.includes(prizeName);
                 
-                // Highlight current block
-                blockArray[currentIndex].classList.add('highlight');
+                if (!prizeStillNeeded) {
+                    console.log(`✅ Prize ${prizeName} has been drawn!`);
+                    clearInterval(checkInterval);
+                    resolve();
+                }
                 
-                rollCount++;
+                // Safety timeout in case something goes wrong
+                if (this.currentPrizeIndex >= this.actualResults.length) {
+                    console.log(`🔄 All prizes drawn, resolving ${prizeName}`);
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 100); // Check every 100ms
+        });
+    }
+    
+    // Stop continuous movement when all prizes are drawn
+    stopContinuousMovement() {
+        console.log('� Stopping continuous red movement');
+        this.continuousMovementActive = false;
+        
+        // Clean up red highlights
+        if (this.blocks) {
+            this.blocks.forEach(block => {
+                if (!block.hasAttribute('data-final-winner')) {
+                    block.classList.remove('highlight');
+                }
+            });
+        }
+    }
+    
+    // CLEAN GOLDEN SHINE: Simple, reliable, well-displayed
+    triggerCleanGoldenShine(winningBlock, ticketNumber, prizeName) {
+        console.log(`🌟 CLEAN GOLDEN SHINE: ${prizeName} (Ticket #${ticketNumber})`);
+        
+        // Authorize this exact moment for golden shine
+        this.goldenShineLocked = false;
+        this.authorizedWinningBlock = winningBlock;
+        
+        // Apply golden shine with full visibility
+        winningBlock.classList.add('golden-win');
+        winningBlock.setAttribute('data-golden-protected', 'true');
+        winningBlock.setAttribute('data-ticket-number', ticketNumber);
+        
+        // Update counter immediately
+        console.log(`📊 IMMEDIATE COUNT UPDATE: ${prizeName}`);
+        this.updatePrizeCounter(prizeName);
+        
+        // Celebration effect
+        this.showMiniCelebration(winningBlock);
+        
+        // Golden shine duration: exactly 0.5 seconds, uninterrupted
+        setTimeout(() => {
+            // Clean up golden shine
+            winningBlock.classList.remove('golden-win');
+            winningBlock.removeAttribute('data-golden-protected');
+            winningBlock.removeAttribute('data-ticket-number');
+            
+            // Mark as completed to protect from future cleanup
+            winningBlock.setAttribute('data-final-winner', 'true');
+            
+            // Re-lock golden shine system
+            this.goldenShineLocked = true;
+            this.authorizedWinningBlock = null;
+            
+            console.log(`✅ CLEAN GOLDEN SHINE COMPLETED: ${prizeName}`);
+        }, 500); // Exactly 0.5 seconds
+    }
+    
+    performLotterySpinning(blocks, duration) {
+        return new Promise((resolve) => {
+            console.log('🌪️ Phase 1: Fast spinning phase');
+            
+            const startTime = Date.now();
+            let currentIndex = Math.floor(Math.random() * blocks.length);
+            
+            const fastSpin = () => {
+                const elapsed = Date.now() - startTime;
                 
-                // Check if we should stop on winning block
-                if (rollCount >= maxRolls && currentIndex === winningIndex) {
-                    // Stop on winning block - show golden flash IMMEDIATELY
-                    setTimeout(() => {
-                        blocks.forEach(block => block.classList.remove('highlight'));
-                        winningBlock.classList.add('golden-win');
-                        
-                        // Mini celebration effect
-                        this.showMiniCelebration(winningBlock);
-                        
-                        setTimeout(() => {
-                            winningBlock.classList.remove('golden-win');
-                            resolve();
-                        }, 300); // Shorter golden flash time
-                    }, speed);
+                if (elapsed < duration) {
+                    // *** ULTRA-AGGRESSIVE CLEANUP: Remove ALL animation classes including golden-win ***
+                    blocks.forEach(block => {
+                        // ALWAYS remove golden-win during spinning phase (it should never be there)
+                        block.classList.remove('highlight', 'golden-win', 'pre-highlight', 'rolling', 'fast-draw', 'slow-draw');
+                        // Also remove protection markers during animation phases
+                        if (!block.hasAttribute('data-final-winner')) { // Don't touch completed winners
+                            block.removeAttribute('data-golden-protected');
+                            block.removeAttribute('data-ticket-number');
+                        }
+                    });
+                    
+                    // Add ONLY highlight to current block (NEVER golden-win during animation)
+                    const currentBlock = blocks[currentIndex];
+                    if (!currentBlock.hasAttribute('data-final-winner')) { // Don't touch completed winners
+                        currentBlock.classList.add('highlight');
+                    }
+                    
+                    // Move to next block (fast random movement)
+                    currentIndex = (currentIndex + 1) % blocks.length;
+                    
+                    // Fast speed with variation - MUCH FASTER
+                    const speed = 40 + Math.random() * 30; // 40-70ms (was 80-120ms)
+                    setTimeout(fastSpin, speed);
+                } else {
+                    resolve();
+                }
+            };
+            
+            fastSpin();
+        });
+    }
+    
+    performGradualSlowdown(blocks, duration) {
+        return new Promise((resolve) => {
+            console.log('🐌 Phase 2: Gradual slowdown phase');
+            
+            const startTime = Date.now();
+            let currentIndex = Math.floor(Math.random() * blocks.length);
+            let initialSpeed = 60; // Faster initial (was 120)
+            let finalSpeed = 200; // Faster final (was 400)
+            
+            const slowingSpin = () => {
+                const elapsed = Date.now() - startTime;
+                const progress = elapsed / duration;
+                
+                if (progress < 1) {
+                    // *** ULTRA-AGGRESSIVE CLEANUP: Remove ALL animation classes including golden-win ***
+                    blocks.forEach(block => {
+                        // ALWAYS remove golden-win during slowdown phase (it should never be there)
+                        block.classList.remove('highlight', 'golden-win', 'pre-highlight', 'rolling', 'fast-draw', 'slow-draw');
+                        // Also remove protection markers during animation phases
+                        if (!block.hasAttribute('data-final-winner')) { // Don't touch completed winners
+                            block.removeAttribute('data-golden-protected');
+                            block.removeAttribute('data-ticket-number');
+                        }
+                    });
+                    
+                    // Add ONLY highlight to current block (NEVER golden-win during animation)
+                    const currentBlock = blocks[currentIndex];
+                    if (!currentBlock.hasAttribute('data-final-winner')) { // Don't touch completed winners
+                        currentBlock.classList.add('highlight');
+                    }
+                    
+                    // Move to next block
+                    currentIndex = (currentIndex + 1) % blocks.length;
+                    
+                    // Gradually slow down
+                    const currentSpeed = initialSpeed + (progress * (finalSpeed - initialSpeed));
+                    setTimeout(slowingSpin, currentSpeed);
+                } else {
+                    resolve();
+                }
+            };
+            
+            slowingSpin();
+        });
+    }
+    
+    performTargetSelection(blocks, winningBlock, duration) {
+        return new Promise((resolve) => {
+            console.log('🎯 Phase 3: Target selection phase');
+            
+            const winningIndex = Array.from(blocks).indexOf(winningBlock);
+            let targetingAttempts = 0;
+            const maxAttempts = 3;
+            
+            const targetingSequence = () => {
+                if (targetingAttempts >= maxAttempts) {
+                    resolve();
                     return;
                 }
                 
-                // Move to next block
-                currentIndex = (currentIndex + 1) % blockArray.length;
+                // *** ULTRA-AGGRESSIVE CLEANUP: Remove ALL animation classes including golden-win ***
+                blocks.forEach(block => {
+                    // ALWAYS remove golden-win during targeting phase (it should never be there)
+                    block.classList.remove('highlight', 'golden-win', 'pre-highlight', 'rolling', 'fast-draw', 'slow-draw');
+                    // Also remove protection markers during animation phases
+                    if (!block.hasAttribute('data-final-winner')) { // Don't touch completed winners
+                        block.removeAttribute('data-golden-protected');
+                        block.removeAttribute('data-ticket-number');
+                    }
+                });
                 
-                // Gradually slow down as we approach the end
-                if (rollCount > maxRolls - 3) {
-                    speed *= 1.2; // Faster slowdown
+                let targetIndex;
+                
+                if (targetingAttempts === maxAttempts - 1) {
+                    // Final attempt: definitely hit the winner
+                    targetIndex = winningIndex;
+                } else {
+                    // Earlier attempts: might miss nearby
+                    const missChance = 0.3 - (targetingAttempts * 0.1);
+                    if (Math.random() < missChance) {
+                        // Near miss
+                        const offset = Math.random() < 0.5 ? -1 : 1;
+                        targetIndex = (winningIndex + offset + blocks.length) % blocks.length;
+                    } else {
+                        targetIndex = winningIndex;
+                    }
                 }
                 
-                setTimeout(roll, speed);
+                // Add ONLY highlight to target (NEVER golden-win during targeting!)
+                const targetBlock = blocks[targetIndex];
+                if (!targetBlock.hasAttribute('data-final-winner')) { // Don't touch completed winners
+                    targetBlock.classList.add('highlight'); // Only highlight, NEVER golden-win
+                }
+                
+                targetingAttempts++;
+                
+                // Faster dramatic pause between attempts
+                const pauseDuration = 200 + (targetingAttempts * 50); // Reduced from 400+100
+                setTimeout(targetingSequence, pauseDuration);
             };
             
-            roll();
+            targetingSequence();
+        });
+    }
+    
+    performWinnerReveal(winningBlock, duration) {
+        return new Promise((resolve) => {
+            console.log('🌟 Phase 4: Winner reveal phase');
+            
+            const prizeName = winningBlock.getAttribute('data-name');
+            const ticketNumber = this.currentTicketIndex + 1;
+            
+            // *** CRITICAL: STRICT CLEANUP - Remove ALL animation classes from ALL blocks ***
+            const allBlocks = document.querySelectorAll('.block');
+            allBlocks.forEach(block => {
+                // Only clean blocks that are NOT already golden-protected from previous draws
+                if (!block.hasAttribute('data-golden-protected')) {
+                    block.classList.remove('highlight', 'golden-win', 'pre-highlight', 'rolling', 'fast-draw', 'slow-draw');
+                }
+            });
+            
+            console.log(`🎯 STRICT VERIFICATION: Only block with prize "${prizeName}" should get golden shine`);
+            console.log(`🔒 Winning block ID: ${winningBlock.id || 'no-id'}, data-name: ${prizeName}`);
+            
+            // Dramatic pause before golden reveal
+            setTimeout(() => {
+                // *** SUPER STRICT: Verify this is the EXACT winning block before applying golden shine ***
+                const blockPrizeName = winningBlock.getAttribute('data-name');
+                if (blockPrizeName !== prizeName) {
+                    console.error(`❌ BLOCK MISMATCH: Expected ${prizeName}, but block has ${blockPrizeName}`);
+                    this.animationErrors.push({ 
+                        ticket: ticketNumber, 
+                        error: `Block mismatch: expected ${prizeName}, got ${blockPrizeName}`,
+                        prize: prizeName 
+                    });
+                    resolve();
+                    return;
+                }
+                
+                // *** VERIFY AUTHORIZATION: Is this the authorized winning block? ***
+                if (winningBlock !== this.authorizedWinningBlock) {
+                    console.error(`❌ AUTHORIZATION MISMATCH: Block is not the authorized winner for this draw!`);
+                    this.animationErrors.push({ 
+                        ticket: ticketNumber, 
+                        error: `Block not authorized for golden shine`,
+                        prize: prizeName 
+                    });
+                    resolve();
+                    return;
+                }
+                
+                // *** DOUBLE CHECK: Ensure no other blocks have golden-win class ***
+                allBlocks.forEach((block, index) => {
+                    if (block !== winningBlock && block.classList.contains('golden-win')) {
+                        console.error(`❌ FALSE GOLDEN SHINE DETECTED on block ${index}: ${block.getAttribute('data-name')}`);
+                        block.classList.remove('golden-win'); // Force remove
+                        block.removeAttribute('data-golden-protected'); // Force remove protection
+                        this.falseGoldenShines++;
+                    }
+                });
+                
+                // *** UNLOCK GOLDEN SHINE FOR THIS EXACT MOMENT ***
+                console.log(`🔓 UNLOCKING: Golden shine authorized for block: ${prizeName}`);
+                this.goldenShineLocked = false;
+                
+                // *** SAFE GOLDEN WINNER REVEAL - Only on verified winning block ***
+                console.log(`✅ VERIFIED: Applying golden shine to authorized block: ${prizeName}`);
+                winningBlock.classList.add('golden-win');
+                winningBlock.setAttribute('data-golden-protected', 'true');
+                winningBlock.setAttribute('data-ticket-number', ticketNumber);
+                
+                console.log(`🏆 GOLDEN WINNER REVEALED: ${prizeName} (Ticket #${ticketNumber})`);
+                console.log(`⏰ Golden shine started at: ${Date.now()}`);
+                
+                // *** CRITICAL: Update counter IMMEDIATELY when golden shine appears ***
+                console.log(`🔥 INSTANT COUNTER UPDATE: ${prizeName} at golden shine start`);
+                this.updatePrizeCounter(prizeName);
+                
+                // Force DOM refresh to ensure counter update is visible
+                document.getElementById('results-summary').offsetHeight; // Force reflow
+                
+                // Verify the shine is visible
+                const shineCheck = setTimeout(() => {
+                    if (!winningBlock.classList.contains('golden-win')) {
+                        console.error(`❌ MISSED SHINE DETECTED: ${prizeName} (Ticket #${ticketNumber})`);
+                        this.missedShines++;
+                        this.animationErrors.push({ 
+                            ticket: ticketNumber, 
+                            error: 'Golden shine disappeared prematurely',
+                            prize: prizeName 
+                        });
+                    }
+                }, 100);
+                
+                // Mini celebration for this win
+                this.showMiniCelebration(winningBlock);
+                
+                // Golden shine duration - exactly 0.5 seconds with verification
+                setTimeout(() => {
+                    clearTimeout(shineCheck);
+                    
+                    // *** LOCK GOLDEN SHINE AGAIN ***
+                    console.log(`🔒 RE-LOCKING: Golden shine locked again after draw ${ticketNumber}`);
+                    this.goldenShineLocked = true;
+                    
+                    // Verify golden shine completion
+                    if (winningBlock.getAttribute('data-golden-protected') === 'true') {
+                        winningBlock.classList.remove('golden-win');
+                        winningBlock.removeAttribute('data-golden-protected');
+                        winningBlock.removeAttribute('data-ticket-number');
+                        
+                        // Mark as completed winner to protect from cleanup
+                        winningBlock.setAttribute('data-final-winner', 'true');
+                        
+                        console.log(`✨ GOLDEN SHINE COMPLETED: ${prizeName} (Ticket #${ticketNumber})`);
+                        console.log(`⏰ Golden shine ended at: ${Date.now()}`);
+                        
+                        // Immediate verification that the counter will be updated
+                        console.log(`🔢 About to update counter for: ${prizeName}`);
+                        resolve();
+                    } else {
+                        console.error(`❌ PROTECTION MARKER MISSING: ${prizeName} (Ticket #${ticketNumber})`);
+                        this.animationErrors.push({ 
+                            ticket: ticketNumber, 
+                            error: 'Protection marker was removed unexpectedly',
+                            prize: prizeName 
+                        });
+                        resolve();
+                    }
+                }, 500); // Exactly 0.5 seconds
+                
+            }, 100); // Reduced dramatic pause
         });
     }
 
-    chooseWinningBlock(matchingBlocks, targetPrize) {
-        // Track block usage for fair distribution
-        if (!this.blockUsage) {
-            this.blockUsage = {};
-        }
+    // Add missing showMiniCelebration method for proper lottery animation
+    showMiniCelebration(winningBlock) {
+        if (!winningBlock) return;
         
-        // For $50 prizes (6 blocks), try to distribute evenly
-        if (targetPrize === '$50 Cash Prize') {
-            const leastUsedBlock = matchingBlocks.reduce((least, current) => {
-                const blockIndex = Array.from(document.querySelectorAll('.block')).indexOf(current);
-                const currentUsage = this.blockUsage[blockIndex] || 0;
-                const leastUsage = this.blockUsage[Array.from(document.querySelectorAll('.block')).indexOf(least)] || 0;
-                return currentUsage < leastUsage ? current : least;
-            });
+        // Create a small celebration effect around the winning block
+        const rect = winningBlock.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Create small sparkles around the winning block
+        for (let i = 0; i < 8; i++) {
+            const sparkle = document.createElement('div');
+            sparkle.style.position = 'fixed';
+            sparkle.style.left = centerX + 'px';
+            sparkle.style.top = centerY + 'px';
+            sparkle.style.width = '6px';
+            sparkle.style.height = '6px';
+            sparkle.style.background = '#FFD700';
+            sparkle.style.borderRadius = '50%';
+            sparkle.style.pointerEvents = 'none';
+            sparkle.style.zIndex = '1000';
             
-            const blockIndex = Array.from(document.querySelectorAll('.block')).indexOf(leastUsedBlock);
-            this.blockUsage[blockIndex] = (this.blockUsage[blockIndex] || 0) + 1;
-            return leastUsedBlock;
+            // Random direction for sparkle
+            const angle = (i / 8) * 2 * Math.PI;
+            const distance = 30 + Math.random() * 20;
+            const endX = centerX + Math.cos(angle) * distance;
+            const endY = centerY + Math.sin(angle) * distance;
+            
+            sparkle.style.transition = 'all 0.6s ease-out';
+            
+            document.body.appendChild(sparkle);
+            
+            // Animate sparkle
+            setTimeout(() => {
+                sparkle.style.left = endX + 'px';
+                sparkle.style.top = endY + 'px';
+                sparkle.style.opacity = '0';
+                sparkle.style.transform = 'scale(0.3)';
+            }, 50);
+            
+            // Remove sparkle
+            setTimeout(() => {
+                if (document.body.contains(sparkle)) {
+                    document.body.removeChild(sparkle);
+                }
+            }, 700);
         }
+    }
+
+    chooseWinningBlock(matchingBlocks, targetPrize, prizeIndex) {
+        console.log(`🎯 Choosing block for ${targetPrize} (prize #${prizeIndex + 1})`);
         
-        // For $100 prizes (2 blocks), alternate
-        if (targetPrize === '$100 Cash Prize') {
-            if (!this.last100Block) this.last100Block = 0;
-            const selectedBlock = matchingBlocks[this.last100Block % matchingBlocks.length];
-            this.last100Block++;
+        // EVEN DISTRIBUTION LOGIC for multiple blocks of same prize type
+        if (targetPrize === '$50 Cash Prize') {
+            // 6 blocks for $50 - distribute evenly using round-robin
+            const blockIndex = prizeIndex % matchingBlocks.length;
+            const selectedBlock = matchingBlocks[blockIndex];
+            console.log(`💰 $50 prize distributed to block ${blockIndex + 1}/${matchingBlocks.length}`);
             return selectedBlock;
         }
         
-        // For $500 prize (1 block), use the only one
+        if (targetPrize === '$100 Cash Prize') {
+            // 2 blocks for $100 - alternate between them
+            const blockIndex = prizeIndex % matchingBlocks.length;
+            const selectedBlock = matchingBlocks[blockIndex];
+            console.log(`💵 $100 prize distributed to block ${blockIndex + 1}/${matchingBlocks.length}`);
+            return selectedBlock;
+        }
+        
+        // For $500 prize (1 block), always use the only one
+        console.log(`💎 $500 prize using the only block`);
         return matchingBlocks[0];
     }
 
     updatePrizeCounter(prize) {
-        // STRICT VALIDATION: Never exceed expected counts from actualResults
-        if (this.prizeCounts[prize] >= this.expectedFinalCounts[prize]) {
-            console.warn(`🚫 PREVENTED COUNT OVERFLOW: ${prize} already at max (${this.expectedFinalCounts[prize]})`);
-            return;
+        console.log(`🔢 COUNTER UPDATE STARTED for: ${prize}`);
+        console.log(`⏰ Counter update timestamp: ${Date.now()}`);
+        console.log(`📊 Current counts before update:`, JSON.stringify(this.prizeCounts));
+        
+        try {
+            // Validate prize name
+            if (!prize || typeof prize !== 'string') {
+                console.error(`❌ INVALID PRIZE NAME: ${prize}`);
+                return false;
+            }
+            
+            // Validate prize exists in distribution
+            if (!this.prizeDistribution[prize]) {
+                console.error(`❌ PRIZE NOT IN DISTRIBUTION: ${prize}`);
+                return false;
+            }
+            
+            // SIMPLE AND RELIABLE: Each call represents exactly one golden shine
+            this.prizeCounts[prize]++;
+            this.ticketsDrawnCount++;
+            this.totalWinnings += this.prizeDistribution[prize].value;
+            
+            console.log(`✨ Prize counted: ${prize} (${this.prizeCounts[prize]}), Total tickets: ${this.ticketsDrawnCount}/${this.actualResults.length}, Winnings: $${this.totalWinnings}`);
+            console.log(`📊 Updated counts:`, JSON.stringify(this.prizeCounts));
+            
+            // Update UI immediately with error handling
+            console.log(`🖼️ About to update UI display for: ${prize}`);
+            const uiUpdateSuccess = this.updateCounterDisplay(prize);
+            
+            if (!uiUpdateSuccess) {
+                console.error(`❌ UI UPDATE FAILED for: ${prize}`);
+                return false;
+            }
+            
+            console.log(`✅ COUNTER UPDATE COMPLETE for: ${prize}`);
+            return true;
+            
+        } catch (error) {
+            console.error(`❌ COUNTER UPDATE ERROR for ${prize}:`, error);
+            this.animationErrors.push({ 
+                ticket: this.currentTicketIndex + 1, 
+                error: `Counter update failed: ${error.message}`,
+                prize: prize 
+            });
+            return false;
         }
-        
-        // Update internal counts (safely within preset bounds)
-        this.prizeCounts[prize]++;
-        this.ticketsDrawnCount++;
-        this.totalWinnings += this.prizeDistribution[prize].value;
-        
-        console.log(`✨ Prize won: ${prize} (${this.prizeCounts[prize]}/${this.expectedFinalCounts[prize]}), Tickets: ${this.ticketsDrawnCount}/${this.actualResults.length}, Total: $${this.totalWinnings}`);
-        
-        // Update UI immediately
-        this.updateCounterDisplay(prize);
     }
 
     updateCounterDisplay(prize) {
-        // Update tickets drawn IMMEDIATELY - no delays
-        const ticketsElement = document.getElementById('tickets-drawn');
-        ticketsElement.textContent = this.ticketsDrawnCount;
-        this.animateCounterUpdate(ticketsElement);
+        console.log(`🖼️ UI UPDATE STARTED for: ${prize}`);
+        console.log(`⏰ UI update timestamp: ${Date.now()}`);
         
-        // Update specific prize counter IMMEDIATELY
-        const counterId = `counter-${prize.replace(/\s+/g, '-').replace(/\$/g, '')}`;
-        const counterElement = document.getElementById(counterId);
-        if (counterElement) {
-            const countSpan = counterElement.querySelector('.count');
-            countSpan.textContent = this.prizeCounts[prize];
-            this.animateCounterUpdate(countSpan);
+        try {
+            let updateSuccess = true;
+            
+            // Update tickets drawn
+            const ticketsElement = document.getElementById('tickets-drawn');
+            if (ticketsElement) {
+                console.log(`📊 Updating tickets drawn: ${this.ticketsDrawnCount}`);
+                ticketsElement.textContent = this.ticketsDrawnCount;
+                this.animateCounterUpdate(ticketsElement);
+            } else {
+                console.error(`❌ tickets-drawn element not found!`);
+                updateSuccess = false;
+            }
+            
+            // Update specific prize counter
+            const counterId = `counter-${prize.replace(/\s+/g, '-').replace(/\$/g, '')}`;
+            console.log(`🎯 Looking for counter element: ${counterId}`);
+            const counterElement = document.getElementById(counterId);
+            if (counterElement) {
+                const countSpan = counterElement.querySelector('.count');
+                if (countSpan) {
+                    console.log(`💰 Updating ${prize} counter: ${this.prizeCounts[prize]}`);
+                    countSpan.textContent = this.prizeCounts[prize];
+                    this.animateCounterUpdate(countSpan);
+                } else {
+                    console.error(`❌ .count span not found in ${counterId}!`);
+                    updateSuccess = false;
+                }
+            } else {
+                console.error(`❌ Counter element ${counterId} not found!`);
+                updateSuccess = false;
+            }
+            
+            // Update total winnings
+            const totalElement = document.getElementById('total-amount');
+            if (totalElement) {
+                console.log(`💵 Updating total winnings: $${this.totalWinnings.toLocaleString()}`);
+                totalElement.textContent = `${this.totalWinnings.toLocaleString()}`;
+                this.animateCounterUpdate(totalElement);
+                this.showCashAnimation(totalElement);
+            } else {
+                console.error(`❌ total-amount element not found!`);
+                updateSuccess = false;
+            }
+            
+            if (updateSuccess) {
+                console.log(`✅ UI Updated Successfully - ${prize}: ${this.prizeCounts[prize]}, Total tickets: ${this.ticketsDrawnCount}`);
+            }
+            
+            return updateSuccess;
+            
+        } catch (error) {
+            console.error(`❌ UI UPDATE ERROR for ${prize}:`, error);
+            return false;
         }
-        
-        // Update total winnings IMMEDIATELY (no double $)
-        const totalElement = document.getElementById('total-amount');
-        totalElement.textContent = `${this.totalWinnings.toLocaleString()}`;
-        this.animateCounterUpdate(totalElement);
-        this.showCashAnimation(totalElement);
     }
 
     animateCounterUpdate(element) {
@@ -516,54 +1148,84 @@ class SalesLottery {
         const prizeCountsDiv = document.getElementById('prize-counts');
         prizeCountsDiv.innerHTML = '';
         
-        // Create counter displays for all prizes
+        // Create counter displays for all prizes WITH CURRENT VALUES
         Object.keys(this.prizeDistribution).forEach(prize => {
             const prizeItem = document.createElement('div');
             prizeItem.className = 'prize-item';
             prizeItem.id = `counter-${prize.replace(/\s+/g, '-').replace(/\$/g, '')}`;
             
+            // Use current count values instead of hardcoded 0
+            const currentCount = this.prizeCounts[prize] || 0;
             prizeItem.innerHTML = `
                 <div class="prize-name">${prize}</div>
-                <div class="prize-count"><span class="count">0</span></div>
+                <div class="prize-count"><span class="count">${currentCount}</span></div>
             `;
             prizeCountsDiv.appendChild(prizeItem);
         });
         
-        // Initialize totals (no double $)
-        document.getElementById('total-amount').textContent = '0';
-        document.getElementById('tickets-drawn').textContent = '0';
+        // Use current values instead of hardcoded 0
+        document.getElementById('total-amount').textContent = this.totalWinnings ? this.totalWinnings.toLocaleString() : '0';
+        document.getElementById('tickets-drawn').textContent = this.ticketsDrawnCount || '0';
+        
+        console.log(`🖼️ displayLiveCounters: Showing current values - Tickets: ${this.ticketsDrawnCount}, Winnings: $${this.totalWinnings}`);
     }
 
     completeDrawing() {
-        console.log('Drawing complete!');
+        console.log('🏁 Drawing complete!');
+        console.log(`📊 Final counts: ${JSON.stringify(this.prizeCounts)}`);
+        console.log(`🎫 Total tickets drawn: ${this.ticketsDrawnCount}/${this.actualResults.length}`);
+        console.log(`💰 Total winnings: $${this.totalWinnings.toLocaleString()}`);
         
-        // FINAL VALIDATION: Ensure counts match expected results exactly
-        let validationPassed = true;
-        let totalActualCount = 0;
+        // COMPREHENSIVE ERROR CHECKING
+        console.log('\n=== ANIMATION VERIFICATION ===');
+        console.log(`🔍 Expected results:`, this.expectedResults);
+        console.log(`🔍 Actual counts:`, this.prizeCounts);
         
-        Object.keys(this.expectedFinalCounts).forEach(prize => {
-            totalActualCount += this.prizeCounts[prize];
-            if (this.prizeCounts[prize] !== this.expectedFinalCounts[prize]) {
-                console.error(`❌ VALIDATION FAILED: ${prize} - Expected: ${this.expectedFinalCounts[prize]}, Actual: ${this.prizeCounts[prize]}`);
-                validationPassed = false;
-                // FORCE CORRECTION: Set to expected value
-                this.prizeCounts[prize] = this.expectedFinalCounts[prize];
+        // Check for mismatches
+        let hasErrors = false;
+        Object.keys(this.expectedResults).forEach(prize => {
+            const expected = this.expectedResults[prize];
+            const actual = this.prizeCounts[prize] || 0;
+            if (expected !== actual) {
+                console.error(`❌ MISMATCH: ${prize} - Expected: ${expected}, Actual: ${actual}`);
+                hasErrors = true;
+            } else {
+                console.log(`✅ CORRECT: ${prize} - ${actual}/${expected}`);
             }
         });
         
-        // Validate total ticket count
-        if (totalActualCount !== this.actualResults.length) {
-            console.error(`❌ TOTAL COUNT MISMATCH: Expected ${this.actualResults.length} total tickets, got ${totalActualCount}`);
-            validationPassed = false;
+        if (this.missedShines > 0) {
+            console.error(`❌ MISSED SHINES: ${this.missedShines}`);
+            hasErrors = true;
         }
         
-        if (validationPassed) {
-            console.log(`✅ VALIDATION PASSED: All prize counts match expected results (${this.actualResults.length} total tickets)`);
-        } else {
-            console.log(`🔧 CORRECTED: Prize counts forced to match preset results`);
-            // Refresh display with corrected counts
-            this.displayLiveCounters();
+        if (this.falseGoldenShines > 0) {
+            console.error(`❌ FALSE GOLDEN SHINES: ${this.falseGoldenShines}`);
+            hasErrors = true;
         }
+        
+        if (this.animationErrors.length > 0) {
+            console.error(`❌ ANIMATION ERRORS: ${this.animationErrors.length}`);
+            this.animationErrors.forEach(error => {
+                console.error(`  - Ticket ${error.ticket}: ${error.error} (${error.prize})`);
+            });
+            hasErrors = true;
+        }
+        
+        if (!hasErrors) {
+            console.log('🎉 ALL ANIMATIONS AND COUNTS VERIFIED SUCCESSFULLY!');
+        }
+        console.log('=== END VERIFICATION ===\n');
+        
+        // Stop the golden shine monitor
+        this.isAnimatingLottery = false;
+        if (this.monitorInterval) {
+            clearInterval(this.monitorInterval);
+            console.log('🛡️ Golden Shine Monitor stopped');
+        }
+        
+        // Stop continuous movement system
+        this.stopContinuousMovement();
         
         // Update player data
         const player = this.players[this.currentPlayer];
@@ -576,7 +1238,9 @@ class SalesLottery {
             ticketsUsed: player.tickets,
             totalWinnings: this.totalWinnings,
             prizeBreakdown: { ...this.prizeCounts },
-            individualPrizes: [...this.actualResults]
+            individualPrizes: [...this.actualResults],
+            animationErrors: this.animationErrors,
+            missedShines: this.missedShines
         };
         
         // Update remaining tickets display
@@ -783,6 +1447,8 @@ class SalesLottery {
         const blocks = document.querySelectorAll('.block');
         blocks.forEach(block => {
             block.classList.remove('highlight', 'rolling', 'golden-win', 'fast-draw', 'slow-draw', 'pre-highlight', 'pre-highlight-2');
+            // Clean up any remaining protection markers
+            block.removeAttribute('data-golden-protected');
         });
         
         // Clean up container classes
