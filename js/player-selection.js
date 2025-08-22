@@ -229,8 +229,7 @@ class PlayerSelection {
     filterGroups(searchTerm) {
         const term = searchTerm.toLowerCase();
         this.filteredGroups = Object.values(this.groupData).filter(group => 
-            group.name.toLowerCase().includes(term) || 
-            group.description.toLowerCase().includes(term)
+            group.name.toLowerCase().includes(term)
         );
         this.displayGroups();
     }
@@ -314,9 +313,6 @@ class PlayerSelection {
                         <span class="ticket-number">${player.tickets}</span>
                         <span class="ticket-label">tickets</span>
                     </div>
-                    <div class="ticket-level ${this.getTicketLevel(player.tickets)}">
-                        ${this.getTicketLevelText(player.tickets)}
-                    </div>
                 </div>
             </div>
         `).join('');
@@ -382,17 +378,6 @@ class PlayerSelection {
         this.displayPlayers();
     }
     
-    getTicketLevel(tickets) {
-        if (tickets >= 50) return 'high';
-        if (tickets >= 25) return 'medium';
-        return 'low';
-    }
-    
-    getTicketLevelText(tickets) {
-        if (tickets >= 50) return '⭐⭐⭐ High Volume';
-        if (tickets >= 25) return '⭐⭐ Medium Volume';
-        return '⭐ Standard Volume';
-    }
     
     selectPlayer(employeeId) {
         this.selectedPlayer = employeeId;

@@ -66,79 +66,70 @@ class BlocksLottery {
         this.patternStepCount = 0;
         this.redHighlight1Index = 0;
         this.redHighlight2Index = 0;
+        this.animationStartTime = Date.now();
         
         // Define multiple movement patterns - mix of single and dual red highlights
         this.movementPatterns = [
-            // Single red patterns
+            // Beautiful fast patterns for first 5 seconds
+            {
+                type: 'dual',
+                red1: [0, 1, 2, 3, 4, 5, 6, 7, 8, 0, 1, 2],  // Extended linear flow
+                red2: [8, 7, 6, 5, 4, 3, 2, 1, 0, 8, 7, 6],  // Counter flow
+                description: 'Beautiful Counter Flow',
+                priority: 'beautiful'
+            },
+            {
+                type: 'dual',
+                red1: [4, 1, 7, 3, 5, 0, 8, 2, 6, 4],  // Diamond pattern
+                red2: [0, 2, 6, 8, 1, 3, 7, 5, 4, 0],  // Star pattern
+                description: 'Diamond Star Dance',
+                priority: 'beautiful'
+            },
+            {
+                type: 'dual',
+                red1: [0, 1, 2, 5, 8, 7, 6, 3, 4, 1],  // Clockwise spiral
+                red2: [4, 3, 6, 7, 8, 5, 2, 1, 0, 3],  // Counter spiral
+                description: 'Mesmerizing Spiral',
+                priority: 'beautiful'
+            },
+            {
+                type: 'dual',
+                red1: [0, 2, 4, 6, 8, 1, 3, 5, 7, 0],  // Alternating sweep
+                red2: [1, 3, 5, 7, 0, 2, 4, 6, 8, 1],  // Offset sweep
+                description: 'Hypnotic Weave',
+                priority: 'beautiful'
+            },
+            
+            // Normal patterns for after 5 seconds
             {
                 type: 'single',
                 red1: [0, 1, 2, 3, 4, 5, 6, 7, 8],  // Linear flow
-                description: 'Linear Flow'
+                description: 'Linear Flow',
+                priority: 'normal'
             },
             {
                 type: 'single', 
                 red1: [0, 1, 2, 5, 8, 7, 6, 3, 4],  // Border clockwise
-                description: 'Border Clockwise'
+                description: 'Border Clockwise',
+                priority: 'normal'
             },
             {
                 type: 'single',
                 red1: [4, 1, 4, 3, 4, 5, 4, 7, 4, 0, 4, 2, 4, 6, 4, 8],  // Center focus
-                description: 'Center Focus'
+                description: 'Center Focus',
+                priority: 'normal'
             },
-            
-            // Dual red patterns
             {
                 type: 'dual',
                 red1: [0, 1, 2, 3, 4, 5, 6, 7, 8],
                 red2: [6, 7, 8, 0, 1, 2, 3, 4, 5],  // Chasing
-                description: 'Chasing Dance'
-            },
-            {
-                type: 'dual',
-                red1: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-                red2: [8, 7, 6, 5, 4, 3, 2, 1, 0],  // Mirror
-                description: 'Mirror Dance'
-            },
-            {
-                type: 'dual',
-                red1: [0, 2, 6, 8, 4],
-                red2: [1, 3, 7, 5, 4],  // Dancing alternating
-                description: 'Alternating Dance'
-            },
-            
-            // More single patterns
-            {
-                type: 'single',
-                red1: [0, 3, 1, 4, 2, 5, 6, 7, 8],  // Wave pattern
-                description: 'Beautiful Wave'
-            },
-            {
-                type: 'single',
-                red1: [0, 2, 8, 6, 4, 1, 7, 3, 5],  // Random elegant jumps
-                description: 'Elegant Jumps'
-            },
-            
-            // More dual patterns  
-            {
-                type: 'dual',
-                red1: [0, 1, 2, 3, 4],
-                red2: [8, 7, 6, 5, 4],  // Converging
-                description: 'Converging Hearts'
-            },
-            {
-                type: 'dual',
-                red1: [0, 1, 2, 5, 8, 7, 6, 3, 4],  // Outside spiral
-                red2: [4, 3, 6, 7, 8, 5, 2, 1, 0],  // Inside spiral
-                description: 'Spiral Chase'
+                description: 'Chasing Dance',
+                priority: 'normal'
             }
         ];
         
-        // Start the pattern animation loop (slower timing)
-        this.preDrawingInterval = setInterval(() => {
-            this.movePreHighlightWithPattern();
-        }, 600); // Slower: 600ms between moves
-        
-        this.movePreHighlightWithPattern();
+        // Start with beautiful fast animation for first 5 seconds
+        this.startBeautifulPhase();
     }
 
     stopPreDrawingAnimation() {
@@ -174,8 +165,10 @@ class BlocksLottery {
         
         // Get current pattern
         const currentPattern = this.movementPatterns[this.currentPatternIndex];
+        const elapsedTime = Date.now() - this.animationStartTime;
+        const isBeautifulPhase = elapsedTime < 2500;
         
-        console.log(`${currentPattern.description} (${currentPattern.type}) - Step ${this.patternStepCount}`);
+        console.log(`${currentPattern.description} (${currentPattern.type}) - Step ${this.patternStepCount} ${isBeautifulPhase ? '✨BEAUTIFUL✨' : '🎯NORMAL'}`);
         
         // Handle single or dual red highlights based on pattern type
         const red1Pattern = currentPattern.red1;
@@ -208,14 +201,30 @@ class BlocksLottery {
             
         if (this.patternStepCount >= maxLength) {
             this.patternStepCount = 0;
-            this.currentPatternIndex = (this.currentPatternIndex + 1) % this.movementPatterns.length;
-            const nextPattern = this.movementPatterns[this.currentPatternIndex];
-            console.log(`Switching to: ${nextPattern.description} (${nextPattern.type})`);
             
-            // Add a brief pause between patterns (longer pause)
+            // Pattern switching logic based on phase
+            if (isBeautifulPhase) {
+                // During beautiful phase: cycle through beautiful patterns only
+                const beautifulPatterns = this.movementPatterns.filter(p => p.priority === 'beautiful');
+                const currentBeautifulIndex = beautifulPatterns.findIndex(p => p === currentPattern);
+                const nextBeautifulIndex = (currentBeautifulIndex + 1) % beautifulPatterns.length;
+                this.currentPatternIndex = this.movementPatterns.findIndex(p => p === beautifulPatterns[nextBeautifulIndex]);
+            } else {
+                // During normal phase: cycle through normal patterns only
+                const normalPatterns = this.movementPatterns.filter(p => p.priority === 'normal');
+                const currentNormalIndex = normalPatterns.findIndex(p => p === currentPattern);
+                const nextNormalIndex = (currentNormalIndex + 1) % normalPatterns.length;
+                this.currentPatternIndex = this.movementPatterns.findIndex(p => p === normalPatterns[nextNormalIndex]);
+            }
+            
+            const nextPattern = this.movementPatterns[this.currentPatternIndex];
+            console.log(`Switching to: ${nextPattern.description} (${nextPattern.type}) - ${nextPattern.priority?.toUpperCase()}`);
+            
+            // Add a brief pause between patterns - shorter for beautiful phase
+            const pauseTime = isBeautifulPhase ? 300 : 1200; // Beautiful: 300ms, Normal: 1200ms
             setTimeout(() => {
                 // Continue with next pattern after pause
-            }, 1200); // Longer pause between patterns
+            }, pauseTime);
         }
     }
 
@@ -620,5 +629,46 @@ class BlocksLottery {
             confettiContainer.style.display = 'none';
             confettiContainer.innerHTML = '';
         }, 7000); // Longer cleanup time for more confetti
+    }
+
+    startBeautifulPhase() {
+        console.log('🌟 Starting BEAUTIFUL PHASE - Fast & Spectacular!');
+        
+        // Reset to beautiful patterns
+        this.currentPatternIndex = 0;
+        this.patternStepCount = 0;
+        
+        // Beautiful phase: Much faster, more spectacular timing
+        this.preDrawingInterval = setInterval(() => {
+            this.movePreHighlightWithPattern();
+        }, 180); // Very fast: 180ms between moves for beautiful effect
+        
+        this.movePreHighlightWithPattern();
+        
+        // After 2.5 seconds, transition to normal phase
+        setTimeout(() => {
+            this.transitionToNormalPhase();
+        }, 2500);
+    }
+    
+    transitionToNormalPhase() {
+        console.log('🎯 Transitioning to NORMAL PHASE - Relaxed Animation');
+        
+        // Clear the fast interval
+        if (this.preDrawingInterval) {
+            clearInterval(this.preDrawingInterval);
+            this.preDrawingInterval = null;
+        }
+        
+        // Reset to normal patterns (skip the beautiful ones)
+        this.currentPatternIndex = 4; // Start from normal patterns
+        this.patternStepCount = 0;
+        
+        // Normal phase: Slower, more relaxed timing
+        this.preDrawingInterval = setInterval(() => {
+            this.movePreHighlightWithPattern();
+        }, 600); // Slower: 600ms between moves for normal phase
+        
+        this.movePreHighlightWithPattern();
     }
 }

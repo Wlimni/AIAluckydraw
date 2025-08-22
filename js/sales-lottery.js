@@ -130,21 +130,13 @@ class SalesLottery {
             
             this.updatePlayerDisplay();
             
-            // Show and enable the draw button prominently
+            // Enable the draw button but let CSS animation handle timing
             const drawBtn = document.getElementById('draw-btn');
             if (drawBtn) {
                 drawBtn.style.display = 'block';
                 drawBtn.style.visibility = 'visible';
-                drawBtn.style.opacity = '1';
                 drawBtn.disabled = false;
-                
-                // Add a bit of animation to draw attention
-                setTimeout(() => {
-                    drawBtn.style.transform = 'scale(1.02)';
-                    setTimeout(() => {
-                        drawBtn.style.transform = 'scale(1)';
-                    }, 200);
-                }, 100);
+                // Remove manual opacity/transform overrides to let CSS animation work
             }
         }
     }
@@ -154,14 +146,14 @@ class SalesLottery {
         
         const player = this.players[this.currentPlayer];
         document.getElementById('player-name').textContent = player.name;
-        document.getElementById('remaining-tickets').textContent = `${player.remaining}/${player.tickets}`;
+        document.getElementById('remaining-tickets').textContent = player.remaining;
     }
     
     selectPlayer(playerId) {
         if (!playerId) {
             this.currentPlayer = null;
             document.getElementById('player-name').textContent = 'Select Player';
-            document.getElementById('remaining-tickets').textContent = '/';
+            document.getElementById('remaining-tickets').textContent = '';
             // Hide button when no player selected
             document.getElementById('draw-btn').style.display = 'none';
             document.getElementById('results-summary').classList.add('hidden');
@@ -204,8 +196,6 @@ class SalesLottery {
     
     startBulkDraw() {
         console.log('=== START BULK DRAW ===');
-        console.log('Current player:', this.currentPlayer);
-        console.log('Is drawing:', this.isDrawing);
         
         if (!this.currentPlayer || this.isDrawing) {
             console.log('Cannot start draw - no player or already drawing');
@@ -213,300 +203,151 @@ class SalesLottery {
         }
         
         const player = this.players[this.currentPlayer];
-        console.log('Player data:', player);
-        
         if (player.remaining <= 0) {
             console.log('No tickets remaining');
             return;
         }
         
-        console.log('startBulkDraw called - ensuring pre-drawing animation is stopped');
-        
         // Stop pre-drawing animation immediately
         if (window.blocksLottery && window.blocksLottery.stopPreDrawingAnimation) {
-            console.log('Calling stopPreDrawingAnimation from startBulkDraw...');
             window.blocksLottery.stopPreDrawingAnimation();
-        } else {
-            console.warn('blocksLottery not available in startBulkDraw');
         }
         
         this.isDrawing = true;
-        console.log('Set isDrawing to true');
         
-        // Hide the pre-draw indicator
-        const indicator = document.getElementById('pre-draw-indicator');
-        if (indicator) {
-            indicator.style.display = 'none';
-            console.log('Hid pre-draw indicator');
-        }
+        // Initialize counters and get preset results
+        this.initializeDrawingState(player);
         
-        // Disable all controls during drawing
+        // Start drawing sequence
+        this.startDrawingSequence();
+    }
+
+    initializeDrawingState(player) {
+        // Get predetermined results based on preset or random
+        this.actualResults = this.getActualWinningResults(player.tickets);
+        
+        // Calculate expected final counts from actualResults for validation
+        this.expectedFinalCounts = {};
+        Object.keys(this.prizeDistribution).forEach(prize => {
+            this.expectedFinalCounts[prize] = 0;
+        });
+        
+        this.actualResults.forEach(prize => {
+            this.expectedFinalCounts[prize]++;
+        });
+        
+        console.log(`🎯 Drawing for ${player.name}: ${player.tickets} tickets`);
+        console.log(`📋 Results to animate:`, this.actualResults);
+        console.log(`🎪 Expected final counts:`, this.expectedFinalCounts);
+        
+        // Initialize real-time counters
+        this.prizeCounts = {};
+        Object.keys(this.prizeDistribution).forEach(prize => {
+            this.prizeCounts[prize] = 0;
+        });
+        this.ticketsDrawnCount = 0;
+        this.totalWinnings = 0;
+        
+        // Setup UI
+        this.setupDrawingUI();
+    }
+
+    setupDrawingUI() {
+        // Disable controls and update UI
         this.disableControlsDuringDrawing();
-        console.log('Disabled controls during drawing');
-        
-        // Get the draw button for explosion animation
-        const drawButton = document.getElementById('draw-btn');
-        console.log('Draw button element:', drawButton);
         
         // Start button explosion animation
-        console.log('Starting button explosion...');
+        const drawButton = document.getElementById('draw-btn');
         this.explodeButton(drawButton);
         
-        // Add light ray emission effect
-        document.querySelector('.container').classList.add('light-rays');
-        console.log('Added light-rays class');
+        // Setup visual effects
+        document.querySelector('.container').classList.add('light-rays', 'drawing');
         
-        // Set initial drawing state for container only
-        document.querySelector('.container').classList.add('drawing');
-        console.log('Added drawing class to container');
-        
-        // Hide draw button after explosion starts (with delay)
+        // Initialize results summary
         setTimeout(() => {
             document.getElementById('draw-btn').style.display = 'none';
-        }, 800); // Hide after explosion animation
-        
-        // Show summary box after button explosion
-        setTimeout(() => {
             document.getElementById('results-summary').classList.remove('hidden');
-        }, 600);
+            this.displayLiveCounters();
+        }, 800);
         
-        // Clear winner text - rely on Tickets Drawn counter for progress
+        // Clear winner text
         document.getElementById('winner').textContent = '';
-        
-        // Remove light rays after 2-second red explosion
+    }
+
+    startDrawingSequence() {
+        // Remove light rays after initial excitement
         setTimeout(() => {
             document.querySelector('.container').classList.remove('light-rays');
         }, 2000);
         
-        // Start the actual drawing process after 2-second excitement period
+        // Start the actual prize drawing animations
         setTimeout(() => {
-            this.isDrawing = true;
-            // Add drawing animation to summary box during actual drawing
             document.getElementById('results-summary').classList.add('drawing');
-            // Start the bulk drawing animation
-            this.animateBulkDraw();
+            this.animateSequentialPrizes();
         }, 2000);
     }
     
-    animateBulkDraw() {
+    animateSequentialPrizes() {
         const blocks = document.querySelectorAll('.block');
-        const player = this.players[this.currentPlayer];
-        const ticketCount = player.tickets;
+        let currentPrizeIndex = 0;
         
-        // Start multiple simultaneous animations
-        this.startMultipleAnimations(blocks, ticketCount);
-    }
-    
-    startMultipleAnimations(blocks, ticketCount) {
-        // Faster timing: target about 6 seconds for 25 tickets
-        const targetTimeFor25 = 6000; // 6 seconds for 25 tickets
-        const timePerTicket = targetTimeFor25 / 25; // 240ms per ticket
-        const totalAnimationTime = timePerTicket * ticketCount;
+        console.log(`🎯 Starting animation for ${this.actualResults.length} predetermined prizes`);
         
-        console.log(`Drawing ${ticketCount} tickets - Total time: ${(totalAnimationTime/1000).toFixed(1)} seconds`);
-        
-        // Get the actual results we will show
-        const actualResults = this.getActualWinningResults(ticketCount);
-        
-        // Initialize real-time counting display
-        this.initializeRealtimeCounters();
-        
-        // Show golden animations for EVERY prize
-        const totalPrizes = actualResults.length;
-        const animationPromises = [];
-        
-        // Calculate timing - much faster now
-        const timePerAnimation = Math.max(150, totalAnimationTime / totalPrizes); // At least 150ms per animation
-        
-        console.log(`Showing ${totalPrizes} golden animations over ${(totalAnimationTime/1000).toFixed(1)} seconds`);
-        
-        // Create realistic rolling animations that stop on actual winning prizes
-        for (let i = 0; i < totalPrizes; i++) {
-            const promise = new Promise((resolve) => {
-                const startDelay = i * timePerAnimation; // Evenly spaced animations
-                const winningPrize = actualResults[i]; // Each animation shows one actual prize
-                
+        // Much faster drawing - multiple prizes can be drawn simultaneously
+        const drawNextBatch = () => {
+            // STRICT BOUNDS CHECK: Never exceed actualResults array length
+            if (currentPrizeIndex >= this.actualResults.length) {
+                console.log(`🏁 All ${this.actualResults.length} prizes animated, completing drawing`);
                 setTimeout(() => {
-                    this.animateRealisticDraw(blocks, winningPrize, i + 1, totalPrizes).then(resolve);
-                }, startDelay);
-            });
-            animationPromises.push(promise);
-        }
-        
-        // When all animations complete, process results
-        Promise.all(animationPromises).then(() => {
-            setTimeout(() => {
-                this.processBulkResults();
-            }, 300);
-        });
-    }
-    
-    // Initialize real-time counters that update as golden flashes appear
-    initializeRealtimeCounters() {
-        const prizeCountsDiv = document.getElementById('prize-counts');
-        const resultsBox = document.getElementById('results-summary');
-        
-        // Show the results box immediately but with zero counts
-        resultsBox.classList.remove('hidden');
-        
-        // FIXED: Only initialize if we don't already have counters running AND it's a fresh start
-        if (!this.realtimeCounters || Object.keys(this.realtimeCounters).length === 0 || !this.isDrawing) {
-            console.log('🔄 INITIALIZING COUNTERS: Setting up fresh counters');
-            
-            // Initialize display with all possible prizes at 0
-            prizeCountsDiv.innerHTML = '';
-            this.realtimeCounters = {};
-            this.ticketsDrawnCount = 0;
-            
-            Object.keys(this.prizeDistribution).forEach(prize => {
-                this.realtimeCounters[prize] = 0;
-                
-                const prizeItem = document.createElement('div');
-                prizeItem.className = 'prize-item';
-                prizeItem.id = `counter-${prize.replace(/\s+/g, '-').replace(/\$/g, '')}`;
-                
-                // FIXED LAYOUT: Separate lines to prevent size changes
-                prizeItem.innerHTML = `
-                    <div class="prize-name">${prize}</div>
-                    <div class="prize-count"><span class="count">0</span></div>
-                `;
-                prizeCountsDiv.appendChild(prizeItem);
-            });
-            
-            // Initialize total winnings and tickets drawn at 0
-            document.getElementById('total-amount').textContent = '$0';
-            document.getElementById('tickets-drawn').textContent = '0';
-            this.realtimeTotalWinnings = 0;
-        } else {
-            console.log('🔄 COUNTERS ALREADY ACTIVE: Preserving existing values');
-            console.log('Current counters:', this.realtimeCounters);
-            console.log('Current total:', this.realtimeTotalWinnings);
-        }
-        
-        console.log('Real-time counters initialized. Total winnings:', this.realtimeTotalWinnings);
-    }
-    
-    // Update counter when a golden flash appears (with realistic delay and effect)
-    updateRealtimeCounter(prizeName) {
-        // RULE: After each golden flash, increment both tickets drawn AND the specific prize
-        
-        // 1. Increment tickets drawn counter
-        this.ticketsDrawnCount++;
-        
-        // 2. Increment the specific prize counter
-        this.realtimeCounters[prizeName]++;
-        const prizeValue = this.prizeDistribution[prizeName].value;
-        
-        // Log before adding to catch any issues
-        const oldTotal = this.realtimeTotalWinnings;
-        this.realtimeTotalWinnings += prizeValue;
-        
-        console.log(`Prize won: ${prizeName} (+$${prizeValue}). Total: $${oldTotal} → $${this.realtimeTotalWinnings}`);
-        
-        // Update tickets drawn display
-        setTimeout(() => {
-            const ticketsElement = document.getElementById('tickets-drawn');
-            ticketsElement.style.transition = 'all 0.3s ease-out';
-            ticketsElement.style.transform = 'scale(1.05)';
-            ticketsElement.style.background = 'rgba(248, 113, 113, 0.6)';
-            ticketsElement.style.borderRadius = '8px';
-            ticketsElement.style.padding = '4px 8px';
-            ticketsElement.textContent = this.ticketsDrawnCount;
-            
-            setTimeout(() => {
-                ticketsElement.style.transform = 'scale(1)';
-                ticketsElement.style.background = 'transparent';
-                ticketsElement.style.padding = '0';
-            }, 300);
-        }, 50);
-        
-        // Update specific prize counter display
-        const counterId = `counter-${prizeName.replace(/\s+/g, '-').replace(/\$/g, '')}`;
-        const counterElement = document.getElementById(counterId);
-        
-        if (counterElement) {
-            const countSpan = counterElement.querySelector('.count');
-            const newCount = this.realtimeCounters[prizeName];
-            
-            // Add consistent red/golden background flash effect
-            setTimeout(() => {
-                countSpan.style.transition = 'all 0.3s ease-out';
-                countSpan.style.background = 'linear-gradient(135deg, rgba(248, 113, 113, 0.8), rgba(255, 215, 0, 0.6))';
-                countSpan.style.transform = 'scale(1.15)';
-                countSpan.style.borderRadius = '8px';
-                countSpan.style.padding = '4px 8px';
-                countSpan.style.color = '#fff';
-                countSpan.style.fontWeight = 'bold';
-                countSpan.style.border = '2px solid rgba(255, 215, 0, 0.8)';
-                countSpan.textContent = newCount;
-                
-                setTimeout(() => {
-                    countSpan.style.transform = 'scale(1)';
-                    // Keep the red circle background - don't clear it!
-                    // countSpan.style.background = 'transparent';
-                    // countSpan.style.color = 'inherit';
-                    // countSpan.style.fontWeight = 'inherit';
-                    // countSpan.style.border = 'none';
-                    // countSpan.style.padding = '0';
-                }, 400);
-            }, 50);
-        }
-        
-        // Update total winnings with same delay and proper formatting
-        setTimeout(() => {
-            const totalElement = document.getElementById('total-amount');
-            totalElement.style.transition = 'all 0.3s ease-out';
-            totalElement.style.transform = 'scale(1.05)';
-            totalElement.style.background = 'rgba(255, 215, 0, 0.6)';
-            totalElement.style.borderRadius = '8px';
-            totalElement.style.padding = '4px 8px';
-            
-            // Format the total as currency for clarity
-            totalElement.textContent = `$${this.realtimeTotalWinnings.toLocaleString()}`;
-            
-            // Add cash and money emoji animation for Total Winnings
-            this.showCashAnimation(totalElement);
-            
-            setTimeout(() => {
-                totalElement.style.transform = 'scale(1)';
-                totalElement.style.background = 'transparent';
-                totalElement.style.padding = '0';
-            }, 300);
-        }, 50);
-    }
-    
-    // Get actual winning results for realistic animation
-    getActualWinningResults(ticketCount) {
-        const winningPrizes = [];
-        
-        if (this.usePresetResults && this.presetResults[this.currentPlayer]) {
-            const preset = this.presetResults[this.currentPlayer];
-            
-            // Create array of actual winning prizes
-            Object.entries(preset).forEach(([prize, count]) => {
-                for (let i = 0; i < count; i++) {
-                    winningPrizes.push(prize);
-                }
-            });
-            
-            // Shuffle the prizes for random order during animation
-            return winningPrizes.sort(() => Math.random() - 0.5);
-        } else {
-            // For random mode, generate prizes normally
-            for (let i = 0; i < ticketCount; i++) {
-                winningPrizes.push(this.getWeightedRandomPrize());
+                    this.completeDrawing();
+                }, 300);
+                return;
             }
-            return winningPrizes;
-        }
-    }
-    
-    // Animate a realistic draw that rolls through blocks and stops on winning prize
-    animateRealisticDraw(blocks, targetPrize, drawNumber = 1, totalDraws = 1) {
-        return new Promise((resolve) => {
-            // Clear progress message - use Tickets Drawn counter instead
-            document.getElementById('winner').textContent = '';
             
-            // Find all blocks that match the target prize
+            // Draw multiple prizes simultaneously for speed (2-4 at once)
+            const remainingPrizes = this.actualResults.length - currentPrizeIndex;
+            const batchSize = Math.min(3, remainingPrizes);
+            const promises = [];
+            
+            console.log(`📦 Processing batch of ${batchSize} prizes (${currentPrizeIndex + 1}-${currentPrizeIndex + batchSize} of ${this.actualResults.length})`);
+            
+            for (let i = 0; i < batchSize; i++) {
+                const prizeIndex = currentPrizeIndex + i;
+                // DOUBLE CHECK: Ensure we don't go out of bounds
+                if (prizeIndex < this.actualResults.length) {
+                    const targetPrize = this.actualResults[prizeIndex];
+                    console.log(`🎲 Drawing prize ${prizeIndex + 1}/${this.actualResults.length}: ${targetPrize}`);
+                    
+                    // Start rolling animation for this prize with slight delay
+                    const promise = new Promise((resolve) => {
+                        setTimeout(() => {
+                            this.rollForPrize(blocks, targetPrize).then(() => {
+                                // Prize won - update counters IMMEDIATELY with validation
+                                this.updatePrizeCounter(targetPrize);
+                                resolve();
+                            });
+                        }, i * 100); // 100ms delay between each in batch
+                    });
+                    promises.push(promise);
+                }
+            }
+            
+            // Wait for current batch to complete, then start next batch
+            Promise.all(promises).then(() => {
+                currentPrizeIndex += batchSize;
+                setTimeout(() => {
+                    drawNextBatch();
+                }, 150); // Short delay between batches
+            });
+        };
+        
+        // Start the fast batch drawing
+        drawNextBatch();
+    }
+
+    rollForPrize(blocks, targetPrize) {
+        return new Promise((resolve) => {
+            // Find blocks that match this prize
             const matchingBlocks = Array.from(blocks).filter(block => 
                 block.getAttribute('data-name') === targetPrize
             );
@@ -517,235 +358,301 @@ class SalesLottery {
                 return;
             }
             
-            // For realistic probability, choose block based on position weight
-            const targetBlock = this.getRealisticTargetBlock(matchingBlocks, targetPrize);
+            // Choose which specific block will win
+            const winningBlock = this.chooseWinningBlock(matchingBlocks, targetPrize);
             const blockArray = Array.from(blocks);
-            const targetIndex = blockArray.indexOf(targetBlock);
+            const winningIndex = blockArray.indexOf(winningBlock);
             
             let currentIndex = 0;
-            let rounds = 0;
-            const maxRounds = 1; // Just 1 round for speed
-            let speed = 50; // Much faster starting speed
+            let rollCount = 0;
+            const maxRolls = 3 + Math.floor(Math.random() * 4); // Much faster: 3-6 rolls only
+            let speed = 40; // Much faster starting speed
             
-            const animate = () => {
-                // Remove previous highlight
-                blocks.forEach(block => block.classList.remove('highlight', 'rolling'));
+            const roll = () => {
+                // Clear previous highlights
+                blocks.forEach(block => block.classList.remove('highlight'));
                 
-                // Add rolling highlight to current block
-                blockArray[currentIndex].classList.add('highlight', 'rolling');
+                // Highlight current block
+                blockArray[currentIndex].classList.add('highlight');
                 
-                currentIndex = (currentIndex + 1) % blockArray.length;
+                rollCount++;
                 
-                // Count rounds
-                if (currentIndex === 0) rounds++;
-                
-                // Check if we should stop (reached target after enough rounds)
-                if (rounds >= maxRounds && currentIndex === targetIndex) {
-                    // Final highlight on winning block
+                // Check if we should stop on winning block
+                if (rollCount >= maxRolls && currentIndex === winningIndex) {
+                    // Stop on winning block - show golden flash IMMEDIATELY
                     setTimeout(() => {
-                        blocks.forEach(block => block.classList.remove('highlight', 'rolling'));
-                        targetBlock.classList.add('golden-win');
+                        blocks.forEach(block => block.classList.remove('highlight'));
+                        winningBlock.classList.add('golden-win');
                         
-                        // IMPORTANT: Update counter AFTER golden flash appears (150ms delay)
-                        setTimeout(() => {
-                            this.updateRealtimeCounter(targetPrize);
-                            // Add mini celebration with ribbons and money
-                            this.showMiniCelebration(targetBlock);
-                        }, 150); // Wait 150ms after golden flash starts
+                        // Mini celebration effect
+                        this.showMiniCelebration(winningBlock);
                         
                         setTimeout(() => {
-                            targetBlock.classList.remove('golden-win');
+                            winningBlock.classList.remove('golden-win');
                             resolve();
-                        }, 300); // 0.3 second golden win
-                        
+                        }, 300); // Shorter golden flash time
                     }, speed);
                     return;
                 }
                 
-                // Gradually slow down in the last round
-                if (rounds >= maxRounds - 1) {
-                    speed = Math.min(speed * 1.1, 120); // Slow down quickly
+                // Move to next block
+                currentIndex = (currentIndex + 1) % blockArray.length;
+                
+                // Gradually slow down as we approach the end
+                if (rollCount > maxRolls - 3) {
+                    speed *= 1.2; // Faster slowdown
                 }
                 
-                setTimeout(animate, speed);
+                setTimeout(roll, speed);
             };
             
-            animate();
+            roll();
         });
     }
-    
-    // Choose realistic target block based on position and frequency
-    getRealisticTargetBlock(matchingBlocks, targetPrize) {
-        // Get how many times this prize should appear based on preset
-        let expectedCount = 0;
-        if (this.usePresetResults && this.presetResults[this.currentPlayer]) {
-            expectedCount = this.presetResults[this.currentPlayer][targetPrize] || 0;
+
+    chooseWinningBlock(matchingBlocks, targetPrize) {
+        // Track block usage for fair distribution
+        if (!this.blockUsage) {
+            this.blockUsage = {};
         }
         
-        // Track how many times each block has been selected (you could enhance this)
-        if (!this.blockSelectionCount) {
-            this.blockSelectionCount = {};
-        }
-        
-        // For $50 prizes, distribute more realistically across the 6 blocks
+        // For $50 prizes (6 blocks), try to distribute evenly
         if (targetPrize === '$50 Cash Prize') {
-            // Create weighted selection based on position
-            const weights = matchingBlocks.map((block, index) => {
-                const blockId = Array.from(document.querySelectorAll('.block')).indexOf(block);
-                const timesSelected = this.blockSelectionCount[blockId] || 0;
-                
-                // Give slight preference to earlier positions, but balance usage
-                const positionWeight = Math.max(1, 7 - (timesSelected * 2));
-                return positionWeight;
+            const leastUsedBlock = matchingBlocks.reduce((least, current) => {
+                const blockIndex = Array.from(document.querySelectorAll('.block')).indexOf(current);
+                const currentUsage = this.blockUsage[blockIndex] || 0;
+                const leastUsage = this.blockUsage[Array.from(document.querySelectorAll('.block')).indexOf(least)] || 0;
+                return currentUsage < leastUsage ? current : least;
             });
             
-            const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-            let random = Math.random() * totalWeight;
-            
-            for (let i = 0; i < matchingBlocks.length; i++) {
-                random -= weights[i];
-                if (random <= 0) {
-                    const selectedBlock = matchingBlocks[i];
-                    const blockId = Array.from(document.querySelectorAll('.block')).indexOf(selectedBlock);
-                    this.blockSelectionCount[blockId] = (this.blockSelectionCount[blockId] || 0) + 1;
-                    return selectedBlock;
-                }
-            }
+            const blockIndex = Array.from(document.querySelectorAll('.block')).indexOf(leastUsedBlock);
+            this.blockUsage[blockIndex] = (this.blockUsage[blockIndex] || 0) + 1;
+            return leastUsedBlock;
         }
         
-        // For $100 prizes, alternate between the 2 blocks
+        // For $100 prizes (2 blocks), alternate
         if (targetPrize === '$100 Cash Prize') {
-            if (!this.lastSelectedBlock100) {
-                this.lastSelectedBlock100 = 0;
-            }
-            const selectedBlock = matchingBlocks[this.lastSelectedBlock100 % matchingBlocks.length];
-            this.lastSelectedBlock100++;
+            if (!this.last100Block) this.last100Block = 0;
+            const selectedBlock = matchingBlocks[this.last100Block % matchingBlocks.length];
+            this.last100Block++;
             return selectedBlock;
         }
         
-        // For $500 prize, always use the single block
-        if (targetPrize === '$500 Cash Prize') {
-            return matchingBlocks[0];
+        // For $500 prize (1 block), use the only one
+        return matchingBlocks[0];
+    }
+
+    updatePrizeCounter(prize) {
+        // STRICT VALIDATION: Never exceed expected counts from actualResults
+        if (this.prizeCounts[prize] >= this.expectedFinalCounts[prize]) {
+            console.warn(`🚫 PREVENTED COUNT OVERFLOW: ${prize} already at max (${this.expectedFinalCounts[prize]})`);
+            return;
         }
         
-        // Default: random selection
-        return matchingBlocks[Math.floor(Math.random() * matchingBlocks.length)];
+        // Update internal counts (safely within preset bounds)
+        this.prizeCounts[prize]++;
+        this.ticketsDrawnCount++;
+        this.totalWinnings += this.prizeDistribution[prize].value;
+        
+        console.log(`✨ Prize won: ${prize} (${this.prizeCounts[prize]}/${this.expectedFinalCounts[prize]}), Tickets: ${this.ticketsDrawnCount}/${this.actualResults.length}, Total: $${this.totalWinnings}`);
+        
+        // Update UI immediately
+        this.updateCounterDisplay(prize);
     }
-    
-    animateSingleDraw(blocks, animationType, duration) {
-        return new Promise((resolve) => {
-            const randomBlocks = [...blocks].sort(() => Math.random() - 0.5);
-            const animateBlocks = randomBlocks.slice(0, Math.floor(Math.random() * 3) + 2); // 2-4 blocks
+
+    updateCounterDisplay(prize) {
+        // Update tickets drawn IMMEDIATELY - no delays
+        const ticketsElement = document.getElementById('tickets-drawn');
+        ticketsElement.textContent = this.ticketsDrawnCount;
+        this.animateCounterUpdate(ticketsElement);
+        
+        // Update specific prize counter IMMEDIATELY
+        const counterId = `counter-${prize.replace(/\s+/g, '-').replace(/\$/g, '')}`;
+        const counterElement = document.getElementById(counterId);
+        if (counterElement) {
+            const countSpan = counterElement.querySelector('.count');
+            countSpan.textContent = this.prizeCounts[prize];
+            this.animateCounterUpdate(countSpan);
+        }
+        
+        // Update total winnings IMMEDIATELY (no double $)
+        const totalElement = document.getElementById('total-amount');
+        totalElement.textContent = `${this.totalWinnings.toLocaleString()}`;
+        this.animateCounterUpdate(totalElement);
+        this.showCashAnimation(totalElement);
+    }
+
+    animateCounterUpdate(element) {
+        // Immediate visual feedback with colorful theme animation
+        element.style.transition = 'all 0.4s ease-out';
+        element.style.transform = 'scale(1.2)';
+        element.style.background = 'linear-gradient(45deg, #ffd700, #ffb347, #ff6b9d, #feca57)'; // Gold, orange, pink, yellow
+        element.style.backgroundSize = '400% 400%';
+        element.style.animation = 'gradientShift 0.6s ease-in-out';
+        element.style.borderRadius = '20px';
+        element.style.padding = '8px 16px';
+        element.style.color = '#fff';
+        element.style.fontWeight = 'bold';
+        element.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.6)'; // Golden glow
+        element.style.zIndex = '25'; // Bring to front during animation
+        
+        setTimeout(() => {
+            element.style.transform = 'scale(1.05)'; // Slightly larger than original
+            element.style.background = '#dc2626'; // Back to red color
+            element.style.animation = '';
+            element.style.padding = '6px 14px';
+            element.style.color = '#fff';
+            element.style.boxShadow = '0 2px 8px rgba(220, 38, 38, 0.4)'; // Red glow
+            element.style.zIndex = '15';
+        }, 400);
+        
+        setTimeout(() => {
+            element.style.transform = 'scale(1)'; // Back to normal size
+            element.style.boxShadow = '0 2px 8px rgba(220, 38, 38, 0.3)'; // Subtle red glow
+        }, 600);
+    }
+
+    displayLiveCounters() {
+        const prizeCountsDiv = document.getElementById('prize-counts');
+        prizeCountsDiv.innerHTML = '';
+        
+        // Create counter displays for all prizes
+        Object.keys(this.prizeDistribution).forEach(prize => {
+            const prizeItem = document.createElement('div');
+            prizeItem.className = 'prize-item';
+            prizeItem.id = `counter-${prize.replace(/\s+/g, '-').replace(/\$/g, '')}`;
             
-            // Add animation class
-            animateBlocks.forEach(block => {
-                block.classList.add(animationType === 'fast' ? 'fast-draw' : 'slow-draw');
-            });
-            
-            setTimeout(() => {
-                // Remove animation class
-                animateBlocks.forEach(block => {
-                    block.classList.remove('fast-draw', 'slow-draw');
-                });
-                
-                // Show golden win animation for multiple blocks (simulate multiple wins)
-                const numberOfWins = Math.floor(Math.random() * 3) + 1; // 1-3 wins per animation
-                const winnerBlocks = animateBlocks.slice(0, numberOfWins);
-                
-                // Stagger golden animations by 0.3 seconds each
-                winnerBlocks.forEach((winnerBlock, index) => {
-                    setTimeout(() => {
-                        winnerBlock.classList.add('golden-win');
-                        
-                        setTimeout(() => {
-                            winnerBlock.classList.remove('golden-win');
-                            
-                            // Resolve when last golden animation finishes
-                            if (index === winnerBlocks.length - 1) {
-                                resolve();
-                            }
-                        }, 300); // 0.3 second golden animation
-                        
-                    }, index * 300); // Stagger by 0.3 seconds
-                });
-                
-                // Fallback resolve in case no golden animations
-                if (numberOfWins === 0) {
-                    resolve();
-                }
-                
-            }, duration);
+            prizeItem.innerHTML = `
+                <div class="prize-name">${prize}</div>
+                <div class="prize-count"><span class="count">0</span></div>
+            `;
+            prizeCountsDiv.appendChild(prizeItem);
         });
+        
+        // Initialize totals (no double $)
+        document.getElementById('total-amount').textContent = '0';
+        document.getElementById('tickets-drawn').textContent = '0';
     }
-    
-    processBulkResults() {
-        const blocks = document.querySelectorAll('.block');
-        const player = this.players[this.currentPlayer];
-        const ticketsToProcess = player.remaining;
+
+    completeDrawing() {
+        console.log('Drawing complete!');
         
-        // Clear all highlights
-        blocks.forEach(block => block.classList.remove('highlight'));
+        // FINAL VALIDATION: Ensure counts match expected results exactly
+        let validationPassed = true;
+        let totalActualCount = 0;
         
-        // Draw all tickets at once (for final calculation)
-        const results = this.drawAllTickets(ticketsToProcess);
+        Object.keys(this.expectedFinalCounts).forEach(prize => {
+            totalActualCount += this.prizeCounts[prize];
+            if (this.prizeCounts[prize] !== this.expectedFinalCounts[prize]) {
+                console.error(`❌ VALIDATION FAILED: ${prize} - Expected: ${this.expectedFinalCounts[prize]}, Actual: ${this.prizeCounts[prize]}`);
+                validationPassed = false;
+                // FORCE CORRECTION: Set to expected value
+                this.prizeCounts[prize] = this.expectedFinalCounts[prize];
+            }
+        });
         
-        // Ensure we have results and calculate properly
-        let prizeBreakdown = {};
-        if (results && results.length > 0) {
-            prizeBreakdown = results[0].counts;
+        // Validate total ticket count
+        if (totalActualCount !== this.actualResults.length) {
+            console.error(`❌ TOTAL COUNT MISMATCH: Expected ${this.actualResults.length} total tickets, got ${totalActualCount}`);
+            validationPassed = false;
+        }
+        
+        if (validationPassed) {
+            console.log(`✅ VALIDATION PASSED: All prize counts match expected results (${this.actualResults.length} total tickets)`);
         } else {
-            // Fallback: create empty prize breakdown
-            Object.keys(this.prizeDistribution).forEach(prize => {
-                prizeBreakdown[prize] = 0;
-            });
+            console.log(`🔧 CORRECTED: Prize counts forced to match preset results`);
+            // Refresh display with corrected counts
+            this.displayLiveCounters();
         }
         
         // Update player data
+        const player = this.players[this.currentPlayer];
         player.remaining = 0;
-        const totalWinnings = results.reduce((sum, result) => sum + result.value, 0);
-        player.totalWinnings += totalWinnings;
+        player.totalWinnings += this.totalWinnings;
         
-        // Store individual worker results for detailed tracking
+        // Store results
         this.workerResults[this.currentPlayer] = {
             playerName: player.name,
-            ticketsUsed: ticketsToProcess,
-            totalWinnings: totalWinnings,
-            prizeBreakdown: prizeBreakdown, // Safe prize counts for this worker
-            individualPrizes: results.map(r => r.prize) // List of each prize won
+            ticketsUsed: player.tickets,
+            totalWinnings: this.totalWinnings,
+            prizeBreakdown: { ...this.prizeCounts },
+            individualPrizes: [...this.actualResults]
         };
         
-        // Final processing complete - rely on Tickets Drawn counter for status
-        document.getElementById('winner').textContent = '';
-        
-        // Update UI
+        // Update remaining tickets display
         document.getElementById('remaining-tickets').textContent = '0';
         
-        // Show massive confetti celebration
-        console.log('Starting massive confetti celebration!');
+        // Show massive celebration
         this.showMassiveConfetti();
+        setTimeout(() => this.showSideFireworks(), 500);
         
-        // Add fireworks from both sides
-        setTimeout(() => {
-            this.showSideFireworks();
-        }, 500); // Start fireworks 0.5 seconds after confetti
-        
-        // Show BIG money animation on Total Winnings when all drawing complete
-        setTimeout(() => {
-            const totalElement = document.getElementById('total-amount');
-            this.showMassiveMoneyAnimation(totalElement);
-        }, 500); // Small delay after confetti starts
-        
-        // Reset drawing state
+        // Cleanup and reset
         setTimeout(() => {
             document.querySelector('.container').classList.remove('drawing');
-            // Keep light beam for a bit longer after drawing completes
-            setTimeout(() => {
-                document.getElementById('results-summary').classList.remove('drawing');
-                // Re-enable all controls after drawing is complete
-                this.enableControlsAfterDrawing();
-            }, 2000); // Light beam continues for 2 more seconds
+            document.getElementById('results-summary').classList.remove('drawing');
+            this.enableControlsAfterDrawing();
             this.isDrawing = false;
         }, 2000);
+    }
+    
+    // Initialize real-time counters that update as golden flashes appear
+    initializeRealtimeCounters() {
+        // This method is deprecated - using displayLiveCounters instead
+        this.displayLiveCounters();
+    }
+    
+    // Update counter when a golden flash appears (with realistic delay and effect)
+    updateRealtimeCounter(prizeName) {
+        // This method is deprecated - using updatePrizeCounter instead
+        this.updatePrizeCounter(prizeName);
+    }
+    
+    // Get actual winning results for realistic animation
+    getActualWinningResults(ticketCount) {
+        const winningPrizes = [];
+        
+        if (this.usePresetResults && this.presetResults[this.currentPlayer]) {
+            const preset = this.presetResults[this.currentPlayer];
+            console.log(`🎯 Using preset results for player: ${this.currentPlayer}`);
+            console.log(`📋 Preset data:`, preset);
+            
+            // Create array of actual winning prizes from preset
+            Object.entries(preset).forEach(([prize, count]) => {
+                console.log(`Adding ${count}x ${prize} to results`);
+                for (let i = 0; i < count; i++) {
+                    winningPrizes.push(prize);
+                }
+            });
+            
+            console.log(`🎪 Total prizes to animate: ${winningPrizes.length}`);
+            
+            // Shuffle the prizes for random order during animation
+            return this.shuffleArray([...winningPrizes]);
+        } else {
+            console.log(`🎲 Using random results for player: ${this.currentPlayer}`);
+            if (!this.presetResults[this.currentPlayer]) {
+                console.warn(`⚠️ No preset found for ${this.currentPlayer}. Available presets:`, Object.keys(this.presetResults).slice(0, 5));
+            }
+            // For random mode, generate prizes normally
+            for (let i = 0; i < ticketCount; i++) {
+                winningPrizes.push(this.getWeightedRandomPrize());
+            }
+            return winningPrizes;
+        }
+    }
+
+    shuffleArray(array) {
+        const shuffled = [...array];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+    
+    processBulkResults() {
+        // This method is deprecated - logic moved to completeDrawing()
+        this.completeDrawing();
     }
     
     drawAllTickets(ticketCount) {
@@ -792,48 +699,8 @@ class SalesLottery {
     }
     
     displayResults(results, playerName, ticketsUsed, totalWinnings) {
-        const resultsBox = document.getElementById('results-summary');
-        const prizeCountsDiv = document.getElementById('prize-counts');
-        const totalSummaryDiv = document.getElementById('total-summary');
-        
-        // Get unique counts
-        const prizeCounts = results[0].counts;
-        
-        // DON'T clear the prize counts div - preserve real-time counters!
-        // The real-time counters are already displaying the correct values
-        // prizeCountsDiv.innerHTML = ''; // REMOVED THIS LINE
-        
-        // Only update if we don't have real-time counters (fallback)
-        if (!this.realtimeCounters || Object.keys(this.realtimeCounters).length === 0) {
-            prizeCountsDiv.innerHTML = '';
-            Object.entries(prizeCounts).forEach(([prize, count]) => {
-                if (count > 0) {
-                    const prizeItem = document.createElement('div');
-                    prizeItem.className = 'prize-item';
-                    
-                    prizeItem.innerHTML = `
-                        <span>${prize}</span>
-                        <span class="count">${count}</span>
-                    `;
-                    prizeCountsDiv.appendChild(prizeItem);
-                }
-            });
-        }
-        
-        // Use real-time total instead of calculated total to prevent discrepancies
-        const finalTotal = this.realtimeTotalWinnings || totalWinnings;
-        document.getElementById('total-amount').textContent = `$${finalTotal.toLocaleString()}`;
-        
-        console.log(`Final display: Using real-time total $${finalTotal} instead of calculated $${totalWinnings}`);
-        
-        // Show results box with animation
-        resultsBox.classList.remove('hidden');
-        setTimeout(() => {
-            resultsBox.style.transform = 'scale(1.05)';
-            setTimeout(() => {
-                resultsBox.style.transform = 'scale(1)';
-            }, 200);
-        }, 100);
+        // This method is deprecated - using displayLiveCounters and direct updates
+        console.log('displayResults called but logic moved to real-time updates');
     }
     
     // Display previous results when switching back to a player who has already drawn
@@ -849,20 +716,16 @@ class SalesLottery {
                 prizeItem.className = 'prize-item';
                 
                 prizeItem.innerHTML = `
-                    <span>${prize}</span>
-                    <span class="count">${count}</span>
+                    <div class="prize-name">${prize}</div>
+                    <div class="prize-count"><span class="count">${count}</span></div>
                 `;
                 prizeCountsDiv.appendChild(prizeItem);
             }
         });
         
-        // Only update total if we're not currently drawing (prevent overwriting real-time total)
-        if (!this.isDrawing) {
-            document.getElementById('total-amount').textContent = `$${workerResult.totalWinnings.toLocaleString()}`;
-            console.log(`Displaying previous results: $${workerResult.totalWinnings}`);
-        } else {
-            console.log(`Skipping previous results update - currently drawing. Real-time total: $${this.realtimeTotalWinnings}`);
-        }
+        // Update totals (no double $)
+        document.getElementById('total-amount').textContent = `${workerResult.totalWinnings.toLocaleString()}`;
+        document.getElementById('tickets-drawn').textContent = workerResult.ticketsUsed;
         
         // Show results box
         resultsBox.classList.remove('hidden');
@@ -1203,172 +1066,178 @@ class SalesLottery {
         // COMPREHENSIVE REAL WORKER DATABASE WITH PRESET PRIZES
         // Format: 'areaname-workername': { '$50 Cash Prize': count, '$100 Cash Prize': count, '$500 Cash Prize': count }
         const presetResults = {
-            // === SALES TEAM ===
-            'Sales Team-WongKamWing': {
+            // === HONG KONG ISLAND AREAS ===
+            'Central-WongKamWing': {
                 '$50 Cash Prize': 18, '$100 Cash Prize': 6, '$500 Cash Prize': 1     // Total: $1,900
             },
-            'Sales Team-ChanSiuMing': {
+            'Central-ChanSiuMing': {
                 '$50 Cash Prize': 35, '$100 Cash Prize': 12, '$500 Cash Prize': 3    // Total: $4,750
             },
-            'Sales Team-LeungWaiMan': {
+            'Central-LeungWaiMan': {
                 '$50 Cash Prize': 22, '$100 Cash Prize': 8, '$500 Cash Prize': 2     // Total: $2,900
             },
-            'Sales Team-LiMeiLing': {
+            'Central-LiMeiLing': {
                 '$50 Cash Prize': 15, '$100 Cash Prize': 5, '$500 Cash Prize': 2     // Total: $2,250
             },
-            'Sales Team-LiuChunWai': {
-                '$50 Cash Prize': 45, '$100 Cash Prize': 18, '$500 Cash Prize': 7    // Total: $7,550
-            },
-            'Sales Team-YipSukYee': {
-                '$50 Cash Prize': 14, '$100 Cash Prize': 5, '$500 Cash Prize': 1     // Total: $1,700
-            },
-            'Sales Team-FungKaiMing': {
-                '$50 Cash Prize': 26, '$100 Cash Prize': 9, '$500 Cash Prize': 3     // Total: $3,700
-            },
-            'Sales Team-ChengMeiYuk': {
-                '$50 Cash Prize': 38, '$100 Cash Prize': 13, '$500 Cash Prize': 5    // Total: $5,650
-            },
-            'Sales Team-YuenWaiLun': {
-                '$50 Cash Prize': 21, '$100 Cash Prize': 7, '$500 Cash Prize': 2     // Total: $2,750
-            },
-            'Sales Team-LeeYinWah': {
-                '$50 Cash Prize': 31, '$100 Cash Prize': 11, '$500 Cash Prize': 4    // Total: $4,650
-            },
-            'Sales Team-TamShukLing': {
-                '$50 Cash Prize': 17, '$100 Cash Prize': 6, '$500 Cash Prize': 2     // Total: $2,450
-            },
-            'Sales Team-SitKamPo': {
-                '$50 Cash Prize': 29, '$100 Cash Prize': 10, '$500 Cash Prize': 3    // Total: $3,950
-            },
             
-            // === MARKETING TEAM ===
-            'Marketing Team-TangChiKeung': {
+            'Admiralty-TangChiKeung': {
                 '$50 Cash Prize': 28, '$100 Cash Prize': 9, '$500 Cash Prize': 3     // Total: $3,800
             },
-            'Marketing Team-YeungSukFan': {
+            'Admiralty-YeungSukFan': {
                 '$50 Cash Prize': 12, '$100 Cash Prize': 4, '$500 Cash Prize': 1     // Total: $1,500
             },
-            'Marketing Team-LauHoiYan': {
+            'Admiralty-LauHoiYan': {
                 '$50 Cash Prize': 25, '$100 Cash Prize': 8, '$500 Cash Prize': 2     // Total: $3,050
             },
-            'Marketing Team-ChowKinWah': {
+            'Admiralty-ChowKinWah': {
                 '$50 Cash Prize': 20, '$100 Cash Prize': 7, '$500 Cash Prize': 2     // Total: $2,700
             },
-            'Marketing Team-NgWingYiu': {
+            
+            'WanChai-NgWingYiu': {
                 '$50 Cash Prize': 32, '$100 Cash Prize': 11, '$500 Cash Prize': 4    // Total: $4,700
             },
-            'Marketing Team-MakYeePing': {
+            'WanChai-MakYeePing': {
                 '$50 Cash Prize': 16, '$100 Cash Prize': 6, '$500 Cash Prize': 1     // Total: $2,100
             },
-            'Marketing Team-TsoiMingFai': {
+            'WanChai-TsoiMingFai': {
                 '$50 Cash Prize': 24, '$100 Cash Prize': 8, '$500 Cash Prize': 3     // Total: $3,500
             },
-            'Marketing Team-CheungSoWah': {
+            'WanChai-CheungSoWah': {
                 '$50 Cash Prize': 19, '$100 Cash Prize': 6, '$500 Cash Prize': 2     // Total: $2,550
             },
             
-            // === OPERATIONS TEAM ===
-            'Operations Team-LamKaYan': {
+            'CausewayBay-LamKaYan': {
                 '$50 Cash Prize': 40, '$100 Cash Prize': 15, '$500 Cash Prize': 5    // Total: $6,500
             },
-            'Operations Team-WuChiHung': {
+            'CausewayBay-WuChiHung': {
                 '$50 Cash Prize': 8, '$100 Cash Prize': 3, '$500 Cash Prize': 1      // Total: $1,200
             },
-            'Operations Team-HoSiuLan': {
+            'CausewayBay-HoSiuLan': {
                 '$50 Cash Prize': 27, '$100 Cash Prize': 9, '$500 Cash Prize': 3     // Total: $3,750
             },
-            'Operations Team-KwanYukMing': {
+            'CausewayBay-KwanYukMing': {
                 '$50 Cash Prize': 33, '$100 Cash Prize': 12, '$500 Cash Prize': 4    // Total: $4,850
             },
-            'Operations Team-LoiSiuFung': {
+            
+            // === KOWLOON AREAS ===
+            'TST-LiuChunWai': {
+                '$50 Cash Prize': 45, '$100 Cash Prize': 18, '$500 Cash Prize': 7    // Total: $7,550
+            },
+            'TST-YipSukYee': {
+                '$50 Cash Prize': 14, '$100 Cash Prize': 5, '$500 Cash Prize': 1     // Total: $1,700
+            },
+            'TST-FungKaiMing': {
+                '$50 Cash Prize': 26, '$100 Cash Prize': 9, '$500 Cash Prize': 3     // Total: $3,700
+            },
+            'TST-ChengMeiYuk': {
+                '$50 Cash Prize': 38, '$100 Cash Prize': 13, '$500 Cash Prize': 5    // Total: $5,650
+            },
+            
+            'MongKok-YuenWaiLun': {
+                '$50 Cash Prize': 21, '$100 Cash Prize': 7, '$500 Cash Prize': 2     // Total: $2,750
+            },
+            'MongKok-LeeYinWah': {
+                '$50 Cash Prize': 31, '$100 Cash Prize': 11, '$500 Cash Prize': 4    // Total: $4,650
+            },
+            'MongKok-TamShukLing': {
+                '$50 Cash Prize': 17, '$100 Cash Prize': 6, '$500 Cash Prize': 2     // Total: $2,450
+            },
+            'MongKok-SitKamPo': {
+                '$50 Cash Prize': 29, '$100 Cash Prize': 10, '$500 Cash Prize': 3    // Total: $3,950
+            },
+            
+            'YauMaTei-LoiSiuFung': {
                 '$50 Cash Prize': 23, '$100 Cash Prize': 8, '$500 Cash Prize': 2     // Total: $2,950
             },
-            'Operations Team-ChanKinYip': {
+            'YauMaTei-ChanKinYip': {
                 '$50 Cash Prize': 36, '$100 Cash Prize': 13, '$500 Cash Prize': 5    // Total: $5,600
             },
-            'Operations Team-WongLaiYing': {
+            'YauMaTei-WongLaiYing': {
                 '$50 Cash Prize': 11, '$100 Cash Prize': 4, '$500 Cash Prize': 1     // Total: $1,450
             },
-            'Operations Team-TseungWaiChung': {
+            'YauMaTei-TseungWaiChung': {
                 '$50 Cash Prize': 30, '$100 Cash Prize': 10, '$500 Cash Prize': 4    // Total: $4,500
             },
             
-            // === CUSTOMER SERVICE ===
-            'Customer Service-MaHokKwan': {
+            'HungHom-MaHokKwan': {
                 '$50 Cash Prize': 13, '$100 Cash Prize': 5, '$500 Cash Prize': 1     // Total: $1,650
             },
-            'Customer Service-ChuiMingTak': {
+            'HungHom-ChuiMingTak': {
                 '$50 Cash Prize': 42, '$100 Cash Prize': 16, '$500 Cash Prize': 6    // Total: $6,700
             },
-            'Customer Service-KongSumYee': {
+            'HungHom-KongSumYee': {
                 '$50 Cash Prize': 25, '$100 Cash Prize': 9, '$500 Cash Prize': 3     // Total: $3,650
             },
-            'Customer Service-PoonChiWing': {
+            
+            // === NEW TERRITORIES AREAS ===
+            'ShaTin-PoonChiWing': {
                 '$50 Cash Prize': 34, '$100 Cash Prize': 12, '$500 Cash Prize': 4    // Total: $4,900
             },
-            'Customer Service-LokYeePing': {
+            'ShaTin-LokYeePing': {
                 '$50 Cash Prize': 19, '$100 Cash Prize': 7, '$500 Cash Prize': 2     // Total: $2,650
             },
-            'Customer Service-HuiWaiMing': {
+            'ShaTin-HuiWaiMing': {
                 '$50 Cash Prize': 28, '$100 Cash Prize': 10, '$500 Cash Prize': 3    // Total: $3,900
             },
-            'Customer Service-YungSiuLan': {
+            'ShaTin-YungSiuLan': {
                 '$50 Cash Prize': 16, '$100 Cash Prize': 6, '$500 Cash Prize': 2     // Total: $2,400
             },
             
-            // === CLAIMS DEPARTMENT ===
-            'Claims Department-LawKamWah': {
+            'TaiPo-LawKamWah': {
                 '$50 Cash Prize': 37, '$100 Cash Prize': 14, '$500 Cash Prize': 5    // Total: $5,750
             },
-            'Claims Department-NgaiMeiHong': {
+            'TaiPo-NgaiMeiHong': {
                 '$50 Cash Prize': 22, '$100 Cash Prize': 8, '$500 Cash Prize': 2     // Total: $2,900
             },
-            'Claims Department-SoYukFan': {
+            'TaiPo-SoYukFan': {
                 '$50 Cash Prize': 15, '$100 Cash Prize': 5, '$500 Cash Prize': 1     // Total: $1,750
             },
-            'Claims Department-WanHoiLam': {
+            
+            'TsuenWan-WanHoiLam': {
                 '$50 Cash Prize': 41, '$100 Cash Prize': 15, '$500 Cash Prize': 6    // Total: $6,550
             },
-            'Claims Department-YipChunKit': {
+            'TsuenWan-YipChunKit': {
                 '$50 Cash Prize': 18, '$100 Cash Prize': 6, '$500 Cash Prize': 2     // Total: $2,500
             },
-            'Claims Department-LiuSukMei': {
+            'TsuenWan-LiuSukMei': {
                 '$50 Cash Prize': 26, '$100 Cash Prize': 9, '$500 Cash Prize': 3     // Total: $3,700
             },
             
-            // === ADMINISTRATION ===
-            'Administration-ChanWingHo': {
+            'TuenMun-ChanWingHo': {
                 '$50 Cash Prize': 32, '$100 Cash Prize': 11, '$500 Cash Prize': 4    // Total: $4,700
             },
-            'Administration-LeeMingYee': {
+            'TuenMun-LeeMingYee': {
                 '$50 Cash Prize': 24, '$100 Cash Prize': 8, '$500 Cash Prize': 3     // Total: $3,500
             },
-            'Administration-KwokSiuWah': {
+            'TuenMun-KwokSiuWah': {
                 '$50 Cash Prize': 9, '$100 Cash Prize': 3, '$500 Cash Prize': 1      // Total: $1,250
             },
-            'Administration-LauChiMing': {
+            
+            'YuenLong-LauChiMing': {
                 '$50 Cash Prize': 39, '$100 Cash Prize': 14, '$500 Cash Prize': 5    // Total: $5,850
             },
-            'Administration-TangSukLan': {
+            'YuenLong-TangSukLan': {
                 '$50 Cash Prize': 27, '$100 Cash Prize': 9, '$500 Cash Prize': 3     // Total: $3,750
             },
-            'Administration-HoKinWai': {
+            'YuenLong-HoKinWai': {
                 '$50 Cash Prize': 20, '$100 Cash Prize': 7, '$500 Cash Prize': 2     // Total: $2,700
             },
-            'Administration-ChowYeePing': {
+            
+            // === OUTLYING ISLANDS ===
+            'Lantau-ChowYeePing': {
                 '$50 Cash Prize': 35, '$100 Cash Prize': 12, '$500 Cash Prize': 4    // Total: $4,750
             },
-            'Administration-WongWaiChung': {
+            'Lantau-WongWaiChung': {
                 '$50 Cash Prize': 17, '$100 Cash Prize': 6, '$500 Cash Prize': 2     // Total: $2,450
             },
-            'Administration-LiSiuFan': {
+            
+            'CheungChau-LiSiuFan': {
                 '$50 Cash Prize': 12, '$100 Cash Prize': 4, '$500 Cash Prize': 1     // Total: $1,500
             },
-            'Administration-NgMingTak': {
+            'CheungChau-NgMingTak': {
                 '$50 Cash Prize': 29, '$100 Cash Prize': 10, '$500 Cash Prize': 3    // Total: $3,950
             }
             
-            // EASY TO EXPAND: Just add more workers using the format above!
             // Total: 50+ real workers across all major Hong Kong areas
         };
         

@@ -36,11 +36,12 @@
         <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
       </div>
       
-      <!-- Results Summary Box - Moved up after cells -->
+      <!-- Results Summary Box - Prize counts prominently displayed -->
       <div id="results-summary" class="results-box hidden">
         <h2>🏆 Prize Summary</h2>
         <div class="results-grid">
-          <div class="prize-counts" id="prize-counts"></div>
+          <!-- Prize counts prominently displayed at the front -->
+          <div class="prize-counts-front" id="prize-counts"></div>
           <div class="total-summary" id="total-summary">
             <div class="total-winnings">
               <p>💰 Total Winnings</p>
@@ -64,7 +65,7 @@
       <div class="player-info">
         <div class="current-player">
           <span>Current Player: <strong id="player-name">Loading...</strong></span>
-          <span>Remaining Tickets: <strong id="remaining-tickets">/</strong></span>
+          <span>Remaining Tickets: <strong id="remaining-tickets"></strong></span>
         </div>
         <div class="drawing-controls">
           <button id="back-to-selection" class="secondary-btn">← Back to Selection</button>

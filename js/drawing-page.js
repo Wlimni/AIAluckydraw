@@ -43,11 +43,11 @@ class DrawingPage {
         const remainingTicketsElement = document.getElementById('remaining-tickets');
         
         if (playerNameElement) {
-            playerNameElement.textContent = `${this.playerData.name} (${this.playerData.regionName || 'Selected Region'})`;
+            playerNameElement.textContent = `${this.playerData.name}`;
         }
         
         if (remainingTicketsElement) {
-            remainingTicketsElement.textContent = `${this.playerData.tickets}/${this.playerData.tickets}`;
+            remainingTicketsElement.textContent = `${this.playerData.tickets}`;
         }
         
         // Wait for sales lottery to be ready (should be initialized by app.js)
