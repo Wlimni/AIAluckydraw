@@ -463,59 +463,63 @@ class SalesLottery {
             console.warn('No button provided for explosion animation');
             return;
         }
-        console.log('Starting button explosion animation...');
+        console.log('Starting enhanced button explosion animation...');
         
-        // Create explosion particles
-        const particleCount = 20;
+        // Create explosion particles with enhanced spread
+        const particleCount = 50; // Dense explosion
         const rect = button.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
-        const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'];
+        const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#FF1493', '#32CD32', '#FFA500', '#9370DB', '#00FA9A', '#FFFF00', '#FF69B4'];
         
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.style.position = 'fixed';
             particle.style.left = centerX + 'px';
             particle.style.top = centerY + 'px';
-            particle.style.width = '8px';
-            particle.style.height = '8px';
+            const size = 8 + Math.random() * 12; // Vary size between 8px and 20px
+            particle.style.width = `${size}px`;
+            particle.style.height = `${size}px`;
             particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            particle.style.borderRadius = '50%';
+            particle.style.borderRadius = Math.random() < 0.5 ? '50%' : '0%'; // Circles or squares
             particle.style.zIndex = '1000';
             particle.style.pointerEvents = 'none';
             particle.style.opacity = '1';
-            particle.style.transition = 'all 0.6s ease-out';
+            particle.style.boxShadow = `0 0 ${size * 1.5}px ${colors[Math.floor(Math.random() * colors.length)]}`; // Enhanced glow
+            particle.style.transition = 'all 1s cubic-bezier(0.2, 0.8, 0.4, 1)'; // Explosive easing
             document.body.appendChild(particle);
             
             setTimeout(() => {
-                const angle = (i / particleCount) * 2 * Math.PI + (Math.random() - 0.5) * 0.4;
-                const distance = 50 + Math.random() * 50;
+                const angle = (i / particleCount) * 2 * Math.PI + (Math.random() - 0.5) * 0.8; // Wider angle variation
+                const distance = 100 + Math.random() * 150; // Further spread (100-250px)
                 const newX = centerX + Math.cos(angle) * distance;
                 const newY = centerY + Math.sin(angle) * distance;
                 particle.style.left = newX + 'px';
                 particle.style.top = newY + 'px';
                 particle.style.opacity = '0';
-                particle.style.transform = 'scale(0.2)';
-            }, 50);
+                particle.style.transform = `scale(${0.2 + Math.random() * 0.4}) rotate(${Math.random() * 720}deg)`; // Dynamic scale and full rotations
+            }, 20); // Faster start for immediate explosion
             
             setTimeout(() => {
                 if (document.body.contains(particle)) {
                     document.body.removeChild(particle);
                 }
-            }, 600);
+            }, 1000); // Match transition duration
         }
         
         // Animate button
-        button.style.transition = 'all 0.3s ease-out';
-        button.style.transform = 'scale(1.2)';
-        button.style.opacity = '0.3';
+        button.style.transition = 'all 0.4s ease-out';
+        button.style.transform = 'scale(1.5)';
+        button.style.opacity = '0.2';
+        button.style.boxShadow = '0 0 20px #FFD700';
         setTimeout(() => {
             button.style.transform = 'scale(1)';
             button.style.opacity = '1';
-            button.style.display = 'none'; // Hide after explosion
-        }, 300);
+            button.style.boxShadow = 'none';
+            button.style.display = 'none';
+        }, 400);
         
-        console.log('Button explosion animation completed');
+        console.log('Enhanced button explosion animation completed');
     }
 
     disableControlsDuringDrawing() {
