@@ -25,11 +25,16 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Only create BlocksLottery for pre-drawing animation, not for actual drawing
     console.log('Creating BlocksLottery...');
-    const blocksLottery = new BlocksLottery(blocksContainer, winnerElement);
-    
-    // Make BlocksLottery available globally so SalesLottery can communicate with it
+    // Allow preset winner name to be set later
+    let blocksLottery = new BlocksLottery(blocksContainer, winnerElement);
     window.blocksLottery = blocksLottery;
-    console.log('BlocksLottery set on window object');
+    window.setBlocksLotteryPresetWinner = function(name) {
+        // Re-create BlocksLottery with new preset winner
+        blocksLottery = new BlocksLottery(blocksContainer, winnerElement, name);
+        window.blocksLottery = blocksLottery;
+        return blocksLottery;
+    };
+    console.log('BlocksLottery set on window object, with preset winner setter');
     
     // Check if we're on the drawing page (has player data) or selection page
     const isDrawingPage = localStorage.getItem('selectedPlayer');

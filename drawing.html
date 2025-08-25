@@ -3,7 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>AIA Sales Lottery - Drawing</title>
+    <title>AIA Reward Lottery - Drawing</title>
+    <link rel="icon" type="image/jpeg" href="assets/pic/aialogo.jpeg" />
     <link rel="stylesheet" href="css/styles.css" />
   </head>
   <body>
@@ -25,15 +26,7 @@
       </div>
       
       <div class="blocks-container" id="blocks-container">
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$100 Cash Prize">💵 $100 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$500 Cash Prize">💰 $500 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
-        <div class="block" data-name="$100 Cash Prize">💵 $100 Cash</div>
-        <div class="block" data-name="$50 Cash Prize">💲 $50 Cash</div>
+        <!-- Prize blocks will be dynamically inserted here -->
       </div>
       
       <!-- Results Summary Box - Prize counts prominently displayed -->
@@ -73,6 +66,155 @@
       </div>
       <div id="confetti-container"></div>
     </div>
+    <script>
+      // Define prize sets for each group
+      const prizeSets = {
+        group1: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
+          { name: "$200 Cash Prize", display: "💸 $200 Cash" }
+        ],
+        group2: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
+        ],
+        group4: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
+        ],
+        group8: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
+        ],
+        group9: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
+        ],
+        group10: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
+        ],
+        group13: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
+        ],
+        group23: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
+        ],
+        group24: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
+          { name: "$200 Cash Prize", display: "💸 $200 Cash" }
+        ],
+        group25: [
+          { name: "$20 Cash Prize", display: "$20 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" }
+        ],
+        default: [
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
+        ]
+      };
+
+      // Function to get group from URL query parameter
+      function getGroupFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('group') || 'default';
+      }
+
+      // Function to populate prize blocks
+      function populatePrizeBlocks() {
+        const group = getGroupFromURL();
+        const prizes = prizeSets[group] || prizeSets.default;
+        const container = document.getElementById('blocks-container');
+        container.innerHTML = ''; // Clear existing blocks
+        prizes.forEach(prize => {
+          const block = document.createElement('div');
+          block.className = 'block';
+          block.setAttribute('data-name', prize.name);
+          block.textContent = prize.display;
+          container.appendChild(block);
+        });
+      }
+
+      // Populate prize blocks on page load
+      document.addEventListener('DOMContentLoaded', populatePrizeBlocks);
+    </script>
     <script src="js/blocks.js"></script>
     <script src="js/sales-lottery.js"></script>
     <script src="js/app.js"></script>

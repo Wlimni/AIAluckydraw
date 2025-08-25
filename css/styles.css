@@ -626,6 +626,72 @@ h1 .gold-box {
     border-color: rgba(248, 113, 113, 0.5);
 }
 
+/* $1000 Prize - Ultimate Golden Jackpot */
+.block[data-name*="$1000"] {
+    border: 3px solid rgba(255, 215, 0, 0.6);
+    background: linear-gradient(145deg, rgba(255, 248, 220, 0.15), rgba(255, 215, 0, 0.1));
+    font-weight: bold;
+    position: relative;
+    overflow: hidden;
+}
+
+.block[data-name*="$1000"]::before {
+    background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.3), transparent);
+    animation: shimmer 2s ease-in-out infinite;
+}
+
+.block[data-name*="$1000"]::after {
+    background: radial-gradient(circle at center, rgba(255, 215, 0, 0.4) 0%, rgba(255, 215, 0, 0.2) 50%, transparent 70%);
+}
+
+.block[data-name*="$1000"]:hover {
+    box-shadow: 
+        0 16px 48px rgba(255, 215, 0, 0.4),
+        0 8px 24px rgba(255, 215, 0, 0.3),
+        0 4px 12px rgba(0, 0, 0, 0.1),
+        inset 0 2px 0 rgba(255, 255, 255, 1);
+    border-color: rgba(255, 215, 0, 0.8);
+    transform: translateY(-2px) scale(1.02);
+}
+
+/* $50 Prize - Blue Frame */
+
+.block[data-name*="$50"] {
+    border: 2px solid rgba(59, 130, 246, 0.3);
+}
+
+.block[data-name*="$50"]::before {
+    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.15), transparent);
+}
+
+.block[data-name*="$50"]::after {
+    background: radial-gradient(circle, rgba(59, 130, 246, 0.2), transparent 70%);
+}
+
+
+/* $200 Prize - Purple Shine */
+.block[data-name*="$200"] {
+    border: 2px solid rgba(147, 51, 234, 0.3);
+}
+
+.block[data-name*="$200"]::before {
+    background: linear-gradient(90deg, transparent, rgba(147, 51, 234, 0.15), transparent);
+}
+
+.block[data-name*="$200"]::after {
+    background: radial-gradient(circle, rgba(147, 51, 234, 0.2), transparent 70%);
+}
+
+.block[data-name*="$200"]:hover {
+    box-shadow: 
+        0 12px 32px rgba(147, 51, 234, 0.25),
+        0 6px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 1);
+    border-color: rgba(147, 51, 234, 0.5);
+}
+
+
+
 .block.highlight {
     animation: blockHighlight 0.6s ease-in-out;
     background: linear-gradient(145deg, #f87171, #ef4444);
@@ -883,12 +949,12 @@ h1 .gold-box {
     letter-spacing: 3px;
     white-space: nowrap;
     pointer-events: none;
-    /* Start hidden and fade in at 3s */
+    /* Start hidden and fade in at 3.3s (0.8s after draw button at 2.5s) */
     opacity: 0;
     animation: 
-        leftArrowAppearSmooth 0.3s ease-out 3s forwards,
-        arrowPulseSync 2s ease-in-out 3.3s infinite, 
-        leftArrowMove 2s ease-in-out 3.3s infinite;
+        leftArrowAppearSmooth 0.3s ease-out 3.3s forwards,
+        arrowPulseSync 2s ease-in-out 3.6s infinite, 
+        leftArrowMove 2s ease-in-out 3.6s infinite;
 }
 
 .right-arrow {
@@ -898,12 +964,12 @@ h1 .gold-box {
     letter-spacing: 3px;
     white-space: nowrap;
     pointer-events: none;
-    /* Start hidden and fade in at 3s */
+    /* Start hidden and fade in at 3.3s (0.8s after draw button at 2.5s) */
     opacity: 0;
     animation: 
-        rightArrowAppearSmooth 0.3s ease-out 3s forwards,
-        arrowPulseSync 2s ease-in-out 3.3s infinite, 
-        rightArrowMove 2s ease-in-out 3.3s infinite;
+        rightArrowAppearSmooth 0.3s ease-out 3.3s forwards,
+        arrowPulseSync 2s ease-in-out 3.6s infinite, 
+        rightArrowMove 2s ease-in-out 3.6s infinite;
 }
 
 /* Remove the pseudo-element approach */
@@ -1703,7 +1769,7 @@ h1 .gold-box {
         background: linear-gradient(270deg, 
             transparent 0%, 
             transparent 15%, 
-            rgba(255, 255, 255, 0.4) 35%, 
+            rgba(255, 255, 255, 0.4)  35%, 
             rgba(255, 255, 255, 0.6) 50%, 
             rgba(255, 255, 255, 0.4) 65%, 
             transparent 85%, 

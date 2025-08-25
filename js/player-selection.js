@@ -37,29 +37,8 @@ class PlayerSelection {
             
             return groups;
         } catch (error) {
-            console.error('Failed to load real data, using fallback dummy data:', error);
-            
-            // Fallback dummy data in case of error
-            const groups = {
-                'group-1': {
-                    id: 'group-1',
-                    name: 'Group 1',
-                    icon: '👨‍👩‍👧‍👦',
-                    description: 'Team Members',
-                    workers: [
-                        { name: 'WongKamWing', tickets: 25, employeeId: 'EMP001001' },
-                        { name: 'ChanSiuMing', tickets: 50, employeeId: 'EMP001002' },
-                        { name: 'LeungWaiMan', tickets: 32, employeeId: 'EMP001003' }
-                    ]
-                }
-            };
-            
-            Object.values(groups).forEach(group => {
-                group.totalWorkers = group.workers.length;
-                group.totalTickets = group.workers.reduce((sum, worker) => sum + worker.tickets, 0);
-            });
-            
-            return groups;
+            console.error('Failed to load real data', error);
+            return {};
         }
     }
     

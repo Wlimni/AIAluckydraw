@@ -7,17 +7,6 @@ class BlocksLottery {
         this.drawDuration = 6000; // 6 seconds of smooth animation
         this.initialInterval = 30; // Very fast initial speed (30ms)
         this.finalInterval = 500; // Slow final speed (500ms) before lock-on
-        
-        // Try to load audio files (optional - will fail silently if not found)
-        this.audioEnabled = true;
-        try {
-            this.spinSound = new Audio('assets/audio/spin.mp3');
-            this.winSound = new Audio('assets/audio/win.mp3');
-            this.spinSound.volume = 0.3;
-            this.winSound.volume = 0.5;
-        } catch (e) {
-            this.audioEnabled = false;
-        }
     }
 
     async startDraw() {
@@ -29,12 +18,6 @@ class BlocksLottery {
         
         // Show pre-draw animation on all blocks
         await this.showPreDrawAnimation();
-        
-        // Play spin sound if available
-        if (this.audioEnabled && this.spinSound) {
-            this.spinSound.currentTime = 0;
-            this.spinSound.play().catch(() => {});
-        }
         
         // Start the highlight animation
         await this.animateBlocks();
@@ -381,12 +364,6 @@ class BlocksLottery {
                 // Show winner text with animation
                 const winnerName = winnerBlock.getAttribute('data-name');
                 this.winnerElement.textContent = `🎉 Winner: ${winnerName}! 🎉`;
-                
-                // Play win sound if available
-                if (this.audioEnabled && this.winSound) {
-                    this.winSound.currentTime = 0;
-                    this.winSound.play().catch(() => {});
-                }
                 
                 // Show confetti after a short delay
                 setTimeout(() => {
