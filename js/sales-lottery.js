@@ -1,3 +1,4 @@
+// Sales Lottery Logic
 class SalesLottery {
     constructor() {
         this.players = {};
@@ -7,6 +8,7 @@ class SalesLottery {
         this.usePresetResults = true;
         this.presetResults = {};
         this.preDrawingTimeout = null;
+        this.isPreDrawingStopped = false; // Flag to permanently stop pre-drawing animation
         this.loadPresetResultsFromJSON().then(() => {
             this.initializeEvents();
         });
@@ -104,12 +106,38 @@ class SalesLottery {
                     return;
                 }
 
+                // Permanently stop pre-drawing animation
+                this.isPreDrawingStopped = true;
+                console.log('Pre-drawing animation permanently stopped');
+
+                // Stop pre-drawing animation and remove overlay forever
+                if (this.preDrawingTimeout) {
+                    clearTimeout(this.preDrawingTimeout);
+                    this.preDrawingTimeout = null;
+                    console.log('Cleared preDrawingTimeout');
+                }
                 if (window.blocksLottery && window.blocksLottery.stopPreDrawingAnimation) {
                     console.log('Calling stopPreDrawingAnimation...');
                     window.blocksLottery.stopPreDrawingAnimation();
                     console.log('stopPreDrawingAnimation called');
                 } else {
-                    console.warn('blocksLottery or stopPreDrawingAnimation method not found on window object');
+                    console.warn('blocksLottery or stopPreDrawingAnimation not found, applying fallback cleanup');
+                    const blocks = document.querySelectorAll('.block');
+                    blocks.forEach(block => {
+                        block.classList.remove('pre-highlight', 'highlight', 'rolling', 'fast-draw', 'slow-draw');
+                    });
+                    const container = document.getElementById('blocks-container');
+                    if (container) {
+                        container.classList.remove('pre-drawing');
+                    }
+                }
+                // Always remove the pre-drawing overlay from DOM if present
+                const preDrawingOverlay = document.getElementById('pre-drawing-overlay');
+                if (preDrawingOverlay) {
+                    preDrawingOverlay.style.display = 'none';
+                    if (preDrawingOverlay.parentNode) {
+                        preDrawingOverlay.parentNode.removeChild(preDrawingOverlay);
+                    }
                 }
 
                 const pressEl = document.getElementById('press') || document.querySelector('.press') || document.getElementById('press-instruction') || document.querySelector('.press-instruction');
@@ -185,10 +213,36 @@ class SalesLottery {
     }
 
     startPreDrawingAnimationDebounced() {
+        // Pre-drawing animation is permanently stopped after draw, never start again
+        if (this.isPreDrawingStopped) {
+            console.log('Pre-drawing animation is permanently stopped, skipping start');
+            // Also ensure overlay is hidden/removed if still present
+            const preDrawingOverlay = document.getElementById('pre-drawing-overlay');
+            if (preDrawingOverlay) {
+                preDrawingOverlay.style.display = 'none';
+                if (preDrawingOverlay.parentNode) {
+                    preDrawingOverlay.parentNode.removeChild(preDrawingOverlay);
+                }
+            }
+            return;
+        }
         if (this.preDrawingTimeout) {
             clearTimeout(this.preDrawingTimeout);
         }
         this.preDrawingTimeout = setTimeout(() => {
+            // Double-check flag before starting animation
+            if (this.isPreDrawingStopped) {
+                console.log('Pre-drawing animation is permanently stopped (double-check in timeout), skipping start');
+                const preDrawingOverlay = document.getElementById('pre-drawing-overlay');
+                if (preDrawingOverlay) {
+                    preDrawingOverlay.style.display = 'none';
+                    if (preDrawingOverlay.parentNode) {
+                        preDrawingOverlay.parentNode.removeChild(preDrawingOverlay);
+                    }
+                }
+                this.preDrawingTimeout = null;
+                return;
+            }
             if (window.blocksLottery && window.blocksLottery.startPreDrawingAnimation) {
                 if (!window.blocksLottery.isPreDrawing) {
                     console.log('Starting pre-drawing animation');
@@ -204,6 +258,8 @@ class SalesLottery {
     selectPlayer(playerId) {
         if (!playerId) {
             this.currentPlayer = null;
+            // Permanently stop pre-drawing animation if player is cleared
+            this.isPreDrawingStopped = true;
             document.getElementById('player-name').textContent = 'Select Player';
             document.getElementById('remaining-tickets').textContent = '';
             document.getElementById('draw-btn').style.display = 'none';
@@ -623,7 +679,8 @@ class SalesLottery {
             document.getElementById('results-summary').classList.remove('drawing');
             this.enableControlsAfterDrawing();
             this.isDrawing = false;
-            this.startPreDrawingAnimationDebounced();
+            // Do not restart pre-drawing animation
+            console.log('Pre-drawing animation not restarted due to permanent stop');
         }, 2000);
     }
 
@@ -764,8 +821,11 @@ class SalesLottery {
         document.getElementById('draw-btn').style.display = 'block';
         document.getElementById('draw-btn').disabled = false;
         document.getElementById('player-select').value = '';
+        // Permanently stop pre-drawing animation on reset
+        this.isPreDrawingStopped = true;
         this.selectPlayer('');
-        this.startPreDrawingAnimationDebounced();
+        // Do not restart pre-drawing animation
+        console.log('Pre-drawing animation not restarted due to permanent stop');
     }
 
     showMassiveConfetti() {
