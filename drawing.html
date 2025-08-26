@@ -6,10 +6,11 @@
     <title>AIA Reward Lottery - Drawing</title>
     <link rel="icon" type="image/jpeg" href="assets/pic/aialogo.jpeg" />
     <link rel="stylesheet" href="css/styles.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
   </head>
   <body>
     <!-- AIA Logo in top right corner -->
-    <img src="assets/pic/aialogo.jpeg" alt="AIA Logo" class="top-right-logo">
+    <img src="assets/pic/aialogo.jpeg" alt="AIA Logo" class="top-right-logo" style="box-shadow: 0 2px 12px rgba(0,0,0,0.08); border-radius: 18px; background: #fff; border: 2px solid #e5e7eb;">
     
     <div class="container delay-indicator">
       <div class="title-section">
@@ -31,7 +32,7 @@
       
       <!-- Results Summary Box - Prize counts prominently displayed -->
       <div id="results-summary" class="results-box hidden">
-        <h2>🏆 Prize Summary</h2>
+        <h2 style="font-size: 1.18em; color: #1e293b; font-weight: 700; margin-bottom: 0.7em;">Prize Summary</h2>
         <div class="results-grid">
           <!-- Prize counts prominently displayed at the front -->
           <div class="prize-counts-front" id="prize-counts"></div>
@@ -46,7 +47,7 @@
             </div>
           </div>
         </div>
-        <button id="new-draw-btn" class="secondary-btn">Draw Another Player</button>
+        <button id="new-draw-btn" class="secondary-btn" style="font-size: 1em; border-radius: 10px; border: 1.5px solid #e5e7eb; background: #f3f4f6; color: #334155; padding: 8px 18px; font-weight: 600;">Draw Another Player</button>
       </div>
       
       <div class="draw-btn-wrapper">
@@ -250,7 +251,7 @@
           .block.prize-preview-500 { box-shadow: 0 0 24px 8px rgba(249,115,22,0.55), 0 0 0 4px #ffedd5; }
           .block.prize-preview-1000 { box-shadow: 0 0 24px 8px rgba(255,215,0,0.65), 0 0 0 4px #fff8c6; }
           .container.delay-indicator {
-            box-shadow: 0 0 50px 15px rgba(255, 215, 0, 0.85), inset 0 0 20px rgba(255, 215, 0, 0.65);
+            box-shadow: 0 0 60px 10px rgba(255, 215, 0, 0.8), inset 0 0 20px rgba(255, 215, 0, 0.65);
             transition: box-shadow 0.5s ease;
           }
           @keyframes prizePreviewGlow {

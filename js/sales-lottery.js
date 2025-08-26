@@ -1,15 +1,12 @@
 class SalesLottery {
     constructor() {
-        // Initialize players from preset configuration
         this.players = {};
         this.currentPlayer = null;
         this.isDrawing = false;
-        // Track individual worker results for detailed reporting
         this.workerResults = {};
-        // Use preset results
         this.usePresetResults = true;
-        // Load preset results from extracted_data.json
         this.presetResults = {};
+        this.preDrawingTimeout = null;
         this.loadPresetResultsFromJSON().then(() => {
             this.initializeEvents();
         });
@@ -19,7 +16,6 @@ class SalesLottery {
         try {
             const response = await fetch('./extracted_data.json');
             const data = await response.json();
-            // Map prize keys from JSON to internal format
             const prizeKeyMap = {
                 '$20': '$20 Cash Prize',
                 '$50': '$50 Cash Prize',
@@ -28,7 +24,6 @@ class SalesLottery {
                 '$500': '$500 Cash Prize',
                 '$1000': '$1000 Cash Prize'
             };
-            // Build presetResults: key = groupName-workerName (no spaces), value = {prize: count}
             Object.values(data).forEach(group => {
                 group.workers.forEach(worker => {
                     const groupKey = (group.name || group.district || group.id || '').replace(/\s+/g, '');
@@ -42,7 +37,6 @@ class SalesLottery {
                         });
                     }
                     this.presetResults[key] = mappedPrizeCounts;
-                    // Initialize player data
                     this.players[key] = {
                         name: worker.name || worker.employeeId || 'Unknown',
                         tickets: Object.values(mappedPrizeCounts).reduce((sum, count) => sum + count, 0),
@@ -57,12 +51,13 @@ class SalesLottery {
             console.error('Failed to load preset results from extracted_data.json:', e);
         }
     }
-    
+
     initializeEvents() {
         const playerSelect = document.getElementById('player-select');
         const drawBtn = document.getElementById('draw-btn');
         const newDrawBtn = document.getElementById('new-draw-btn');
-        
+        const backToSelectionBtn = document.getElementById('back-to-selection');
+
         if (playerSelect) {
             playerSelect.addEventListener('change', (e) => {
                 if (this.isDrawing) {
@@ -72,7 +67,7 @@ class SalesLottery {
                 this.selectPlayer(e.target.value);
             });
         }
-        
+
         if (drawBtn) {
             drawBtn.addEventListener('click', () => {
                 console.log('=== DRAW BUTTON CLICKED ===');
@@ -109,18 +104,6 @@ class SalesLottery {
                     return;
                 }
 
-                // Hide the press instruction immediately (try both id and class)
-                const pressEl = document.getElementById('press') || document.querySelector('.press') || document.getElementById('press-instruction') || document.querySelector('.press-instruction');
-                if (pressEl) {
-                    pressEl.style.display = 'none';
-                }
-
-                // Trigger red light effect and button explosion at the same time
-                const container = document.querySelector('.container');
-                if (container) container.classList.add('light-rays', 'drawing');
-                this.explodeButton(drawBtn);
-
-                // Stop pre-drawing animation
                 if (window.blocksLottery && window.blocksLottery.stopPreDrawingAnimation) {
                     console.log('Calling stopPreDrawingAnimation...');
                     window.blocksLottery.stopPreDrawingAnimation();
@@ -129,27 +112,47 @@ class SalesLottery {
                     console.warn('blocksLottery or stopPreDrawingAnimation method not found on window object');
                 }
 
+                const pressEl = document.getElementById('press') || document.querySelector('.press') || document.getElementById('press-instruction') || document.querySelector('.press-instruction');
+                if (pressEl) {
+                    pressEl.style.display = 'none';
+                }
+
+                const leftArrow = document.querySelector('.left-arrow');
+                const rightArrow = document.querySelector('.right-arrow');
+                if (leftArrow) leftArrow.style.display = 'none';
+                if (rightArrow) rightArrow.style.display = 'none';
+
+                const container = document.querySelector('.container');
+                if (container) container.classList.add('light-rays', 'drawing');
+                this.explodeButton(drawBtn);
+
                 console.log('Starting bulk draw...');
-                // Delay startBulkDraw to allow button animation to play (lengthened for more dramatic effect)
                 setTimeout(() => {
                     this.startBulkDraw();
-                }, 1800); // Increased delay for longer animation
+                }, 1800);
             });
         }
-        
+
         if (newDrawBtn) {
             newDrawBtn.addEventListener('click', () => {
                 if (this.isDrawing) return;
                 this.resetForNewDraw();
             });
         }
+
+        if (backToSelectionBtn) {
+            backToSelectionBtn.addEventListener('click', () => {
+                if (this.isDrawing) return;
+                window.location.href = 'index.html'; // Adjust URL as needed
+            });
+        }
     }
-    
+
     updatePlayerTickets(ticketCount) {
         const playerData = JSON.parse(localStorage.getItem('selectedPlayer') || '{}');
         console.log('updatePlayerTickets called with:', ticketCount);
         console.log('Player data from localStorage:', playerData);
-        
+
         if (playerData.id) {
             this.players[playerData.id] = {
                 name: playerData.name,
@@ -157,13 +160,13 @@ class SalesLottery {
                 remaining: ticketCount,
                 totalWinnings: 0
             };
-            
+
             this.currentPlayer = playerData.id;
-            console.log('Set currentPlayer emphasizes: ', this.currentPlayer);
+            console.log('Set currentPlayer:', this.currentPlayer);
             console.log('Players object:', this.players);
-            
+
             this.updatePlayerDisplay();
-            
+
             const drawBtn = document.getElementById('draw-btn');
             if (drawBtn) {
                 drawBtn.style.display = 'block';
@@ -172,15 +175,32 @@ class SalesLottery {
             }
         }
     }
-    
+
     updatePlayerDisplay() {
         if (!this.currentPlayer) return;
-        
+
         const player = this.players[this.currentPlayer];
         document.getElementById('player-name').textContent = player.name;
         document.getElementById('remaining-tickets').textContent = player.remaining;
     }
-    
+
+    startPreDrawingAnimationDebounced() {
+        if (this.preDrawingTimeout) {
+            clearTimeout(this.preDrawingTimeout);
+        }
+        this.preDrawingTimeout = setTimeout(() => {
+            if (window.blocksLottery && window.blocksLottery.startPreDrawingAnimation) {
+                if (!window.blocksLottery.isPreDrawing) {
+                    console.log('Starting pre-drawing animation');
+                    window.blocksLottery.startPreDrawingAnimation();
+                } else {
+                    console.log('Pre-drawing animation already running, skipping start');
+                }
+            }
+            this.preDrawingTimeout = null;
+        }, 200);
+    }
+
     selectPlayer(playerId) {
         if (!playerId) {
             this.currentPlayer = null;
@@ -191,12 +211,12 @@ class SalesLottery {
             document.getElementById('winner').textContent = '';
             return;
         }
-        
+
         this.currentPlayer = playerId;
         const player = this.players[playerId];
         document.getElementById('player-name').textContent = player.name;
         document.getElementById('remaining-tickets').textContent = player.remaining;
-        
+
         if (this.workerResults[playerId]) {
             const results = this.workerResults[playerId];
             this.displayPreviousResults(results);
@@ -207,19 +227,11 @@ class SalesLottery {
             document.getElementById('draw-btn').style.display = 'block';
             document.getElementById('draw-btn').disabled = player.remaining <= 0;
             document.getElementById('winner').textContent = '';
-            
-            if (window.blocksLottery && window.blocksLottery.startPreDrawingAnimation) {
-                if (!window.blocksLottery.isPreDrawing) {
-                    setTimeout(() => {
-                        window.blocksLottery.startPreDrawingAnimation();
-                    }, 100);
-                } else {
-                    console.log('Pre-drawing animation already running, not restarting');
-                }
-            }
+
+            this.startPreDrawingAnimationDebounced();
         }
     }
-    
+
     startBulkDraw() {
         console.log('=== START NEW BULK DRAW ===');
         if (!this.currentPlayer || this.isDrawing) {
@@ -231,16 +243,10 @@ class SalesLottery {
             console.log('No tickets remaining');
             return;
         }
-        // Stop and hide pre-drawing animation and UI
-        if (window.blocksLottery && window.blocksLottery.stopPreDrawingAnimation) {
-            window.blocksLottery.stopPreDrawingAnimation();
-        }
-        // Remove pre-drawing classes from container if present
         const container = document.getElementById('blocks-container');
         if (container) {
             container.classList.remove('pre-drawing');
         }
-        // Hide any pre-drawing overlays or elements if present
         const preDrawingOverlay = document.getElementById('pre-drawing-overlay');
         if (preDrawingOverlay) {
             preDrawingOverlay.style.display = 'none';
@@ -253,7 +259,6 @@ class SalesLottery {
             this.isDrawing = false;
             return;
         }
-        // Assign each prize in the preset order to a random cell
         const prizeToBlocks = {};
         blocks.forEach(block => {
             const name = block.getAttribute('data-name');
@@ -286,107 +291,109 @@ class SalesLottery {
         });
         this.animatePresetDraw(blocks, assignedBlocks, this.actualResults);
     }
-    
+
     async animatePresetDraw(blocks, assignedBlocks, prizeOrder) {
-        // Clean up all blocks
+        console.log('Starting animatePresetDraw with prizeOrder:', prizeOrder);
         blocks.forEach(block => {
-            block.classList.remove('highlight', 'golden-win');
+            block.classList.remove('highlight', 'golden-win', 'pre-highlight');
             block.removeAttribute('data-golden-protected');
             block.removeAttribute('data-ticket-number');
+            block.removeAttribute('data-final-winner');
         });
-        // Animation state
         let currentIdx = 0;
         let cycles = 0;
         let prizeIdx = 0;
         const totalPrizes = prizeOrder.length;
         const totalBlocks = blocks.length;
-        let isAnimating = false; // Prevent overlapping animations
-        let timeoutId = null; // Track setTimeout for cleanup
-        // UI setup
-        if (typeof this.disableControlsDuringDrawing === 'function') {
-            this.disableControlsDuringDrawing();
-        } else {
-            console.warn('disableControlsDuringDrawing is not defined, skipping UI control disable');
-        }
+        this.isAnimating = false;
+        this.timeoutId = null;
+        this.disableControlsDuringDrawing();
         document.getElementById('draw-btn').style.display = 'none';
         document.getElementById('results-summary').classList.remove('hidden');
         document.getElementById('winner').textContent = '';
-        // Ensure counters are initialized
         this.ticketsDrawnCount = 0;
         this.totalWinnings = 0;
         this.prizeCounts = {};
-        this.isDrawingComplete = false; // Prevent multiple completeDrawing calls
-        // Animation loop
+        this.isDrawingComplete = false;
+        Object.keys(this.prizeDistribution || {
+            '$20 Cash Prize': 0,
+            '$50 Cash Prize': 0,
+            '$100 Cash Prize': 0,
+            '$200 Cash Prize': 0,
+            '$500 Cash Prize': 0,
+            '$1000 Cash Prize': 0
+        }).forEach(prize => {
+            this.prizeCounts[prize] = 0;
+        });
         const highlightNext = () => {
-            // Stop if animation is complete or already processing
-            if (prizeIdx >= totalPrizes || isAnimating || this.isDrawingComplete) {
+            console.log(`highlightNext called: prizeIdx=${prizeIdx}, currentIdx=${currentIdx}, cycles=${cycles}, isAnimating=${this.isAnimating}`);
+            if (prizeIdx >= totalPrizes || this.isDrawingComplete) {
                 if (prizeIdx >= totalPrizes && !this.isDrawingComplete) {
                     this.isDrawingComplete = true;
-                    if (timeoutId) {
-                        clearTimeout(timeoutId); // Clear any pending timeouts
+                    if (this.timeoutId) {
+                        clearTimeout(this.timeoutId);
+                        this.timeoutId = null;
                     }
-                    setTimeout(() => this.completeDrawing(), 1000);
+                    console.log('Animation complete, scheduling completeDrawing');
+                    this.timeoutId = setTimeout(() => this.completeDrawing(), 1000);
                 }
                 return;
             }
-            isAnimating = true; // Lock animation
-            // Remove highlight from all blocks
+            if (this.isAnimating) {
+                console.warn('Animation already in progress, skipping');
+                return;
+            }
+            this.isAnimating = true;
+            if (this.timeoutId) {
+                clearTimeout(this.timeoutId);
+                this.timeoutId = null;
+            }
             blocks.forEach(block => block.classList.remove('highlight'));
-            // Highlight current block
             const block = blocks[currentIdx];
             block.classList.add('highlight');
-            // Check if this block is assigned a prize, only after first cycle
+            console.log(`Highlighted block ${currentIdx}:`, block.getAttribute('data-name'));
             if (cycles > 0 && prizeIdx < totalPrizes && block === assignedBlocks[prizeIdx]) {
                 const prize = prizeOrder[prizeIdx];
-                // Validate prize to prevent undefined
+                console.log(`Prize hit at prizeIdx=${prizeIdx}: ${prize}`);
                 if (!prize || !this.getPrizeValue(prize)) {
                     console.error(`Invalid prize at index ${prizeIdx}:`, prize);
                     prizeIdx++;
                     currentIdx = (currentIdx + 1) % totalBlocks;
                     if (currentIdx === 0) cycles++;
-                    console.log(`PrizeIdx: ${prizeIdx}, Tickets: ${this.ticketsDrawnCount}, Winnings: $${this.totalWinnings}`);
-                    isAnimating = false; // Unlock for next iteration
-                    timeoutId = setTimeout(highlightNext, 120);
+                    this.isAnimating = false;
+                    this.timeoutId = setTimeout(highlightNext, 120);
                     return;
                 }
-                // Update counters before animation to ensure consistency
                 this.prizeCounts[prize] = (this.prizeCounts[prize] || 0) + 1;
-                this.ticketsDrawnCount = prizeIdx + 1; // Strictly increment
+                this.ticketsDrawnCount = prizeIdx + 1;
                 this.totalWinnings += this.getPrizeValue(prize);
-                // Update summary box immediately
+                console.log(`Updated state: prizeIdx=${prizeIdx}, Tickets=${this.ticketsDrawnCount}, Winnings=$${this.totalWinnings}`);
                 this.displayLiveCounters(true, prize);
-                // Reveal prize: gold shine
                 setTimeout(() => {
                     block.classList.add('golden-win');
                     block.setAttribute('data-golden-protected', 'true');
                     block.setAttribute('data-ticket-number', this.ticketsDrawnCount);
-                    // Mini celebration
+                    console.log(`Showing golden win for ${prize} on block ${currentIdx}`);
                     this.showMiniCelebration(block);
-                    // Remove gold after 0.5s
                     setTimeout(() => {
                         block.classList.remove('golden-win');
                         block.removeAttribute('data-golden-protected');
                         block.removeAttribute('data-ticket-number');
                         block.classList.remove('highlight');
                         block.setAttribute('data-final-winner', 'true');
+                        console.log(`Cleared golden win for block ${currentIdx}`);
+                        prizeIdx++;
+                        currentIdx = (currentIdx + 1) % totalBlocks;
+                        if (currentIdx === 0) cycles++;
+                        this.isAnimating = false;
+                        this.timeoutId = setTimeout(highlightNext, 120);
                     }, 500);
                 }, 80);
-                prizeIdx++;
-            }
-            // Move to next block
-            currentIdx = (currentIdx + 1) % totalBlocks;
-            if (currentIdx === 0) cycles++;
-            // Continue animation if not done
-            if (prizeIdx < totalPrizes) {
-                console.log(`PrizeIdx: ${prizeIdx}, Tickets: ${this.ticketsDrawnCount}, Winnings: $${this.totalWinnings}`);
-                isAnimating = false; // Unlock for next iteration
-                timeoutId = setTimeout(highlightNext, 120);
-            } else if (!this.isDrawingComplete) {
-                this.isDrawingComplete = true;
-                if (timeoutId) {
-                    clearTimeout(timeoutId); // Clear any pending timeouts
-                }
-                setTimeout(() => this.completeDrawing(), 1000);
+            } else {
+                currentIdx = (currentIdx + 1) % totalBlocks;
+                if (currentIdx === 0) cycles++;
+                this.isAnimating = false;
+                this.timeoutId = setTimeout(highlightNext, 120);
             }
         };
         highlightNext();
@@ -410,18 +417,12 @@ class SalesLottery {
     }
 
     initializeDrawingState(player) {
-        // Reset continuous movement system
         this.continuousMovementActive = false;
         this.remainingPrizes = [];
         this.currentPrizeIndex = 0;
-        
-        // Get predetermined results based on preset or random
         this.actualResults = this.getActualWinningResults(player.tickets);
-        
         console.log(`🎯 Drawing for ${player.name}: ${player.tickets} tickets`);
         console.log(`📋 Results to animate (exact order):`, this.actualResults);
-        
-        // Initialize real-time counters (start from zero, increment with each golden shine)
         this.prizeCounts = {};
         Object.keys(this.prizeDistribution || {
             '$20 Cash Prize': 0,
@@ -435,26 +436,17 @@ class SalesLottery {
         });
         this.ticketsDrawnCount = 0;
         this.totalWinnings = 0;
-        
-        // Setup UI
         this.setupDrawingUI();
     }
 
     setupDrawingUI() {
-        // Disable controls and update UI
         this.disableControlsDuringDrawing();
-        
-        // Start visual effects
         document.querySelector('.container').classList.add('light-rays', 'drawing');
-        
-        // Initialize results summary
         setTimeout(() => {
             document.getElementById('draw-btn').style.display = 'none';
             document.getElementById('results-summary').classList.remove('hidden');
             this.displayLiveCounters();
         }, 800);
-        
-        // Clear winner text
         document.getElementById('winner').textContent = '';
     }
 
@@ -464,50 +456,43 @@ class SalesLottery {
             return;
         }
         console.log('Starting enhanced button explosion animation...');
-        
-        // Create explosion particles with enhanced spread
-        const particleCount = 50; // Dense explosion
+        const particleCount = 50;
         const rect = button.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
         const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#FF1493', '#32CD32', '#FFA500', '#9370DB', '#00FA9A', '#FFFF00', '#FF69B4'];
-        
         for (let i = 0; i < particleCount; i++) {
             const particle = document.createElement('div');
             particle.style.position = 'fixed';
             particle.style.left = centerX + 'px';
             particle.style.top = centerY + 'px';
-            const size = 8 + Math.random() * 12; // Vary size between 8px and 20px
+            const size = 8 + Math.random() * 12;
             particle.style.width = `${size}px`;
             particle.style.height = `${size}px`;
             particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            particle.style.borderRadius = Math.random() < 0.5 ? '50%' : '0%'; // Circles or squares
+            particle.style.borderRadius = Math.random() < 0.5 ? '50%' : '0%';
             particle.style.zIndex = '1000';
             particle.style.pointerEvents = 'none';
             particle.style.opacity = '1';
-            particle.style.boxShadow = `0 0 ${size * 1.5}px ${colors[Math.floor(Math.random() * colors.length)]}`; // Enhanced glow
-            particle.style.transition = 'all 1s cubic-bezier(0.2, 0.8, 0.4, 1)'; // Explosive easing
+            particle.style.boxShadow = `0 0 ${size * 1.5}px ${colors[Math.floor(Math.random() * colors.length)]}`;
+            particle.style.transition = 'all 1s cubic-bezier(0.2, 0.8, 0.4, 1)';
             document.body.appendChild(particle);
-            
             setTimeout(() => {
-                const angle = (i / particleCount) * 2 * Math.PI + (Math.random() - 0.5) * 0.8; // Wider angle variation
-                const distance = 100 + Math.random() * 150; // Further spread (100-250px)
+                const angle = (i / particleCount) * 2 * Math.PI + (Math.random() - 0.5) * 0.8;
+                const distance = 100 + Math.random() * 150;
                 const newX = centerX + Math.cos(angle) * distance;
                 const newY = centerY + Math.sin(angle) * distance;
                 particle.style.left = newX + 'px';
                 particle.style.top = newY + 'px';
                 particle.style.opacity = '0';
-                particle.style.transform = `scale(${0.2 + Math.random() * 0.4}) rotate(${Math.random() * 720}deg)`; // Dynamic scale and full rotations
-            }, 20); // Faster start for immediate explosion
-            
+                particle.style.transform = `scale(${0.2 + Math.random() * 0.4}) rotate(${Math.random() * 720}deg)`;
+            }, 20);
             setTimeout(() => {
                 if (document.body.contains(particle)) {
                     document.body.removeChild(particle);
                 }
-            }, 1000); // Match transition duration
+            }, 1000);
         }
-        
-        // Animate button
         button.style.transition = 'all 0.4s ease-out';
         button.style.transform = 'scale(1.5)';
         button.style.opacity = '0.2';
@@ -518,13 +503,13 @@ class SalesLottery {
             button.style.boxShadow = 'none';
             button.style.display = 'none';
         }, 400);
-        
         console.log('Enhanced button explosion animation completed');
     }
 
     disableControlsDuringDrawing() {
         const playerSelect = document.getElementById('player-select');
         const newDrawBtn = document.getElementById('new-draw-btn');
+        const backToSelectionBtn = document.getElementById('back-to-selection');
         const leftArrow = document.querySelector('.left-arrow');
         const rightArrow = document.querySelector('.right-arrow');
         if (leftArrow) leftArrow.style.display = 'none';
@@ -546,16 +531,25 @@ class SalesLottery {
             newDrawBtn.style.background = '#9ca3af';
             newDrawBtn.style.borderColor = '#9ca3af';
         }
+        if (backToSelectionBtn) {
+            backToSelectionBtn.disabled = true;
+            backToSelectionBtn.style.opacity = '0.5';
+            backToSelectionBtn.style.cursor = 'not-allowed';
+            backToSelectionBtn.style.background = '#9ca3af';
+            backToSelectionBtn.style.borderColor = '#9ca3af';
+        }
     }
 
     enableControlsAfterDrawing() {
         const playerSelect = document.getElementById('player-select');
         const newDrawBtn = document.getElementById('new-draw-btn');
+        const backToSelectionBtn = document.getElementById('back-to-selection');
         const blocks = document.querySelectorAll('.block');
         blocks.forEach(block => {
             block.classList.remove('highlight', 'golden-win', 'rolling', 'fast-draw', 'slow-draw', 'pre-highlight');
             block.removeAttribute('data-golden-protected');
             block.removeAttribute('data-ticket-number');
+            block.removeAttribute('data-final-winner');
         });
         const container = document.getElementById('blocks-container');
         if (container) {
@@ -573,6 +567,13 @@ class SalesLottery {
             newDrawBtn.style.background = '';
             newDrawBtn.style.borderColor = '';
         }
+        if (backToSelectionBtn) {
+            backToSelectionBtn.disabled = false;
+            backToSelectionBtn.style.opacity = '1';
+            backToSelectionBtn.style.cursor = 'pointer';
+            backToSelectionBtn.style.background = '';
+            backToSelectionBtn.style.borderColor = '';
+        }
         console.log('All drawing animations and classes cleaned up');
     }
 
@@ -581,7 +582,7 @@ class SalesLottery {
         console.log('Final counts:', JSON.stringify(this.prizeCounts));
         console.log('Total tickets drawn:', this.ticketsDrawnCount, '/', this.actualResults.length);
         console.log(`💰 Total winnings: $${this.totalWinnings.toLocaleString()}`);
-        
+
         let hasErrors = false;
         Object.keys(this.expectedResults || {}).forEach(prize => {
             const expected = this.expectedResults[prize];
@@ -593,15 +594,15 @@ class SalesLottery {
                 console.log(`✅ CORRECT: ${prize} - ${actual}/${expected}`);
             }
         });
-        
+
         if (!hasErrors) {
             console.log('🎉 ALL ANIMATIONS AND COUNTS VERIFIED SUCCESSFULLY!');
         }
-        
+
         const player = this.players[this.currentPlayer];
         player.remaining = 0;
         player.totalWinnings += this.totalWinnings;
-        
+
         this.workerResults[this.currentPlayer] = {
             playerName: player.name,
             ticketsUsed: player.tickets,
@@ -610,18 +611,19 @@ class SalesLottery {
             individualPrizes: [...this.actualResults],
             animationErrors: []
         };
-        
+
         const blocks = document.querySelectorAll('.block');
         blocks.forEach(block => block.classList.remove('highlight'));
-        
+
         this.showMassiveConfetti();
         setTimeout(() => this.showSideFireworks(), 500);
-        
+
         setTimeout(() => {
             document.querySelector('.container').classList.remove('drawing', 'light-rays');
             document.getElementById('results-summary').classList.remove('drawing');
             this.enableControlsAfterDrawing();
             this.isDrawing = false;
+            this.startPreDrawingAnimationDebounced();
         }, 2000);
     }
 
@@ -660,7 +662,7 @@ class SalesLottery {
             this.animateSummaryCounter(ticketsDrawnEl);
         }
 
-        console.log('displayLiveCounters: Tickets:', this.ticketsDrawnCount, ', Winnings: $', this.totalWinnings);
+        console.log(`displayLiveCounters: Tickets=${this.ticketsDrawnCount}, Winnings=$${this.totalWinnings}`);
     }
 
     animateSummaryCounter(element) {
@@ -713,7 +715,6 @@ class SalesLottery {
             console.log(`🎯 Using preset results for player: ${presetKey}`);
             console.log(`📋 Preset data:`, preset);
             Object.entries(preset).forEach(([prize, count]) => {
-                // Validate prize
                 if (this.getPrizeValue(prize)) {
                     console.log(`Adding ${count}x ${prize} to results`);
                     for (let i = 0; i < count; i++) {
@@ -736,7 +737,7 @@ class SalesLottery {
     displayPreviousResults(workerResult) {
         const resultsBox = document.getElementById('results-summary');
         const prizeCountsDiv = document.getElementById('prize-counts');
-        
+
         prizeCountsDiv.innerHTML = '';
         Object.entries(workerResult.prizeBreakdown).forEach(([prize, count]) => {
             if (count > 0) {
@@ -749,10 +750,10 @@ class SalesLottery {
                 prizeCountsDiv.appendChild(prizeItem);
             }
         });
-        
+
         document.getElementById('total-amount').textContent = `${workerResult.totalWinnings.toLocaleString()}`;
         document.getElementById('tickets-drawn').textContent = workerResult.ticketsUsed;
-        
+
         resultsBox.classList.remove('hidden');
     }
 
@@ -764,13 +765,7 @@ class SalesLottery {
         document.getElementById('draw-btn').disabled = false;
         document.getElementById('player-select').value = '';
         this.selectPlayer('');
-        if (window.blocksLottery && window.blocksLottery.startPreDrawingAnimation) {
-            if (!window.blocksLottery.isPreDrawing) {
-                setTimeout(() => {
-                    window.blocksLottery.startPreDrawingAnimation();
-                }, 200);
-            }
-        }
+        this.startPreDrawingAnimationDebounced();
     }
 
     showMassiveConfetti() {
@@ -781,7 +776,7 @@ class SalesLottery {
         }
         console.log('Creating massive confetti celebration...');
         const colors = ['#FFD700', '#FFA500', '#FF6347', '#32CD32', '#1E90FF', '#FF1493', '#9370DB', '#00FA9A'];
-        const emojis = ['💰', '💵', '💸', '🎉', '⭐', '✨', '🏆', '💎', '🎊'];
+        const emojis = ['💰', '💵', '💸', '⭐', '✨', '🎊'];
         for (let burst = 0; burst < 4; burst++) {
             setTimeout(() => {
                 for (let i = 0; i < 20; i++) {
@@ -974,6 +969,4 @@ class SalesLottery {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.salesLottery = new SalesLottery();
-});
+window.SalesLottery = SalesLottery;

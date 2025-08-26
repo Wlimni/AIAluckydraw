@@ -1,3 +1,42 @@
+.ticket-pill {
+  /* ...existing styles... */
+  margin-bottom: 0.6em;
+  display: inline-block;
+}
+/* Gold pill for ticket count only */
+.ticket-pill {
+  display: inline-block;
+  padding: 0.18em 1.1em 0.18em 0.9em;
+  background: linear-gradient(90deg, #ffe066 60%, #ffd700 100%);
+  color: #7c5700;
+  font-weight: 600;
+  font-size: 1em;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px 0 rgba(255,215,0,0.10);
+  border: 1.5px solid #f6e27a;
+  min-width: 0;
+  margin-left: 0.5em;
+  margin-right: 0.1em;
+  vertical-align: middle;
+  transition: background 0.2s;
+}
+.ticket-pill:hover {
+  background: linear-gradient(90deg, #ffd700 60%, #ffe066 100%);
+  color: #a67c00;
+  border-color: #ffd700;
+}
+.ticket-label {
+  margin-left: 0.1em;
+  font-size: 0.98em;
+  color: #64748b;
+}
+/* Plain ticket count, no background or border */
+.ticket-count-plain {
+  font-weight: 600;
+  color: #444;
+  margin-left: 0.5em;
+  font-size: 1em;
+}
 
 /* === $500 Prize - Orange Shine (same structure as $50, but orange) === */
 
@@ -652,13 +691,13 @@ h1 .gold-box {
 
 /* $50 Prize - Green (lighter) */
 .block[data-name*="$50"] {
-    border: 2px solid rgba(34, 197, 94, 0.3);
+    border: 2px solid rgba(222, 224, 223, 0.3);
 }
 .block[data-name*="$50"]::before {
-    background: linear-gradient(90deg, transparent, rgba(34, 197, 94, 0.15), transparent);
+    background: linear-gradient(90deg, transparent, rgba(222, 224, 223, 0.15), transparent);
 }
 .block[data-name*="$50"]::after {
-    background: radial-gradient(circle, rgba(34, 197, 94, 0.2), transparent 70%);
+    background: radial-gradient(circle, rgba(222, 224, 223, 0.2), transparent 70%);
 }
 
 

@@ -218,14 +218,11 @@ class PlayerSelection {
             <div class="player-card" data-player="${player.employeeId}">
                 <div class="player-avatar">👤</div>
                 <h3>${player.name}</h3>
-                <div class="ticket-info-separate">
-                    <span class="ticket-icon">🎫</span>
-                    <span class="ticket-text">${player.tickets} ticket${player.tickets > 1 ? 's' : ''}</span>
-                </div>
+                <span class="ticket-pill">🎫 ${player.tickets} ticket${player.tickets > 1 ? 's' : ''}</span>
                 <div class="player-details">
                     <div class="agency-info">
                         <span class="agency-icon">🏢</span>
-                        <span class="agency-code">${player.agent || 'N/A'}</span>
+                        <span class="agency-code">${player.agent || 'åN/A'}</span>
                     </div>
                     <div class="district-info">
                         <span class="district-icon">📍</span>

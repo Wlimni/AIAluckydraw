@@ -649,3 +649,68 @@ class BlocksLottery {
         this.movePreHighlightWithPattern();
     }
 }
+
+// Function to animate prize cells in a top-left to bottom-right sweep
+function sweepPrizeBlocks() {
+    const blocks = Array.from(document.querySelectorAll('.block'));
+    if (!blocks.length) return 0;
+    const n = blocks.length;
+    const grid = Math.ceil(Math.sqrt(n));
+    let delayMap = [];
+    let maxDelay = 0;
+    const colorMap = {
+      '$20': 'rgba(66,165,245,0.55)',      // blue
+      '$50': 'rgba(102,187,106,0.55)',     // green
+      '$100': 'rgba(239,68,68,0.55)',      // red
+      '$200': 'rgba(156,39,176,0.55)',     // purple
+      '$500': 'rgba(249,115,22,0.55)',     // orange
+      '$1000': 'rgba(255,215,0,0.65)'      // gold
+    };
+    function getPrizeValue(block) {
+      const name = block.getAttribute('data-name') || '';
+      if (name.includes('1000')) return '$1000';
+      if (name.includes('500')) return '$500';
+      if (name.includes('200')) return '$200';
+      if (name.includes('100')) return '$100';
+      if (name.includes('50')) return '$50';
+      if (name.includes('20')) return '$20';
+      return '$50';
+    }
+    for (let i = 0; i < n; i++) {
+      const row = Math.floor(i / grid);
+      const col = i % grid;
+      const delay = (row + col) * 80;
+      delayMap.push({ idx: i, delay });
+      if (delay > maxDelay) maxDelay = delay;
+    }
+    delayMap.sort((a, b) => a.delay - b.delay || a.idx - b.idx);
+    delayMap.forEach(({ idx, delay }) => {
+      setTimeout(() => {
+        const block = blocks[idx];
+        const prize = getPrizeValue(block);
+        if (prize === '$20' || prize === '$50') {
+          // Only preview effect, no color class
+          block.classList.add('prize-preview');
+          setTimeout(() => {
+            block.classList.remove('prize-preview');
+          }, 420);
+          return;
+        }
+        block.classList.add('prize-preview', 'prize-preview-' + prize.replace('$', ''));
+        setTimeout(() => {
+          block.classList.remove('prize-preview', 'prize-preview-' + prize.replace('$', ''));
+        }, 420);
+      }, delay);
+    });
+    const totalDuration = maxDelay + 420;
+    setTimeout(() => {
+      // Wait 1 second after preview animation, then call callback if present
+      setTimeout(() => {
+        if (typeof window.onSweepPrizeBlocksComplete === 'function') {
+          window.onSweepPrizeBlocksComplete();
+        }
+      }, 1000);
+    }, totalDuration);
+    console.log(`Sweep animation started, duration: ${totalDuration}ms + 1s delay`);
+    return totalDuration + 1000;
+}
