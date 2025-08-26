@@ -52,7 +52,7 @@
       <div class="draw-btn-wrapper">
         <div class="left-arrow">Press >>>>></div>
         <button id="draw-btn">Draw All Tickets!</button>
-        <div class="right-arrow"><<<<<  Press</div>
+        <div class="right-arrow"><<<<< Press</div>
       </div>
       <div id="winner"></div>
       <div class="player-info">
@@ -217,7 +217,7 @@
         setTimeout(() => {
           const sweepDuration = sweepPrizeBlocks();
           setTimeout(() => {
-            console.log('Delay period started (4 seconds)');
+            console.log('Delay period started (6 seconds)');
             setTimeout(() => {
               console.log('Starting pre-drawing animation');
               if (window.blocksLottery && window.blocksLottery.startPreDrawingAnimation) {
@@ -228,7 +228,7 @@
                 blocks.forEach(block => block.classList.add('highlight'));
                 setTimeout(() => blocks.forEach(block => block.classList.remove('highlight')), 1000);
               }
-            }, 4000);
+            }, 6000); // Increased delay from 4000ms to 6000ms
           }, sweepDuration);
         }, 80);
       }
@@ -250,7 +250,7 @@
           .block.prize-preview-500 { box-shadow: 0 0 24px 8px rgba(249,115,22,0.55), 0 0 0 4px #ffedd5; }
           .block.prize-preview-1000 { box-shadow: 0 0 24px 8px rgba(255,215,0,0.65), 0 0 0 4px #fff8c6; }
           .container.delay-indicator {
-            box-shadow: 0 0 40px 12px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 50px 15px rgba(255, 215, 0, 0.85), inset 0 0 20px rgba(255, 215, 0, 0.65);
             transition: box-shadow 0.5s ease;
           }
           @keyframes prizePreviewGlow {
