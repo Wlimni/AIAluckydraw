@@ -11,7 +11,7 @@
     <!-- AIA Logo in top right corner -->
     <img src="assets/pic/aialogo.jpeg" alt="AIA Logo" class="top-right-logo">
     
-    <div class="container">
+    <div class="container delay-indicator">
       <div class="title-section">
         <div class="title-row">
           <div class="title-badge">
@@ -71,138 +71,142 @@
       const prizeSets = {
         group1: [
           { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$20 Cash Prize", display: "$20 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
           { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$200 Cash Prize", display: "💸 $200 Cash" },
           { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$20 Cash Prize", display: "$20 Cash" },
-          { name: "$200 Cash Prize", display: "💸 $200 Cash" }
-        ],
-        group2: [
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
           { name: "$500 Cash Prize", display: "💸 $500 Cash" },
           { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
-        ],
-        group4: [
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
           { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
-        ],
-        group8: [
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
-        ],
-        group9: [
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
-        ],
-        group10: [
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
-        ],
-        group13: [
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
-        ],
-        group23: [
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
+          { name: "$50 Cash Prize", display: "$50 Cash" }
         ],
         group24: [
           { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$20 Cash Prize", display: "$20 Cash" },
+          { name: "$200 Cash Prize", display: "💸 $200 Cash" },
           { name: "$50 Cash Prize", display: "$50 Cash" },
           { name: "$100 Cash Prize", display: "💵 $100 Cash" },
           { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
           { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$20 Cash Prize", display: "$20 Cash" },
-          { name: "$200 Cash Prize", display: "💸 $200 Cash" }
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$200 Cash Prize", display: "💸 $200 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" }
         ],
         group25: [
           { name: "$20 Cash Prize", display: "$20 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
           { name: "$100 Cash Prize", display: "💵 $100 Cash" },
           { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
           { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
+        ],
+        group26: [
+          { name: "$20 Cash Prize", display: "$20 Cash" },
           { name: "$500 Cash Prize", display: "💸 $500 Cash" },
           { name: "$20 Cash Prize", display: "$20 Cash" },
-          { name: "$50 Cash Prize", display: "$50 Cash" }
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$20 Cash Prize", display: "$20 Cash" },
         ],
         default: [
           { name: "$50 Cash Prize", display: "$50 Cash" },
+          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
           { name: "$50 Cash Prize", display: "$50 Cash" },
           { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
-          { name: "$500 Cash Prize", display: "💸 $500 Cash" },
           { name: "$1000 Cash Prize", display: "🏆 $1000 Cash" },
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
           { name: "$50 Cash Prize", display: "$50 Cash" },
-          { name: "$100 Cash Prize", display: "💵 $100 Cash" }
-        ]
+          { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+          { name: "$50 Cash Prize", display: "$50 Cash" },
+        ],
       };
 
-      // Function to get group from URL query parameter
-      function getGroupFromURL() {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get('group') || 'default';
+      // Robust function to extract group from localStorage or URL
+      function getCurrentGroupKey() {
+        let groupKey = null;
+        try {
+          let player = localStorage.getItem('player') || localStorage.getItem('selectedPlayer');
+          if (player) {
+            player = JSON.parse(player);
+            if (player.groupName) {
+              const match = player.groupName.match(/Group\s*(\d+)/i);
+              if (match) {
+                groupKey = 'group' + match[1];
+              }
+            }
+          }
+        } catch (e) {}
+        if (!groupKey) {
+          const urlParams = new URLSearchParams(window.location.search);
+          const urlGroup = urlParams.get('group');
+          if (urlGroup) {
+            const match = urlGroup.match(/(\d+)/);
+            if (match) groupKey = 'group' + match[1];
+          }
+        }
+        if (!groupKey) groupKey = 'default';
+        return groupKey;
+      }
+
+      // Function to animate prize cells in a top-left to bottom-right sweep
+      function sweepPrizeBlocks() {
+        const blocks = Array.from(document.querySelectorAll('.block'));
+        if (!blocks.length) return 0;
+        const n = blocks.length;
+        const grid = Math.ceil(Math.sqrt(n));
+        let delayMap = [];
+        let maxDelay = 0;
+        const colorMap = {
+          '$20': 'rgba(66,165,245,0.55)',      // blue
+          '$50': 'rgba(102,187,106,0.55)',     // green
+          '$100': 'rgba(239,68,68,0.55)',      // red
+          '$200': 'rgba(156,39,176,0.55)',     // purple
+          '$500': 'rgba(249,115,22,0.55)',     // orange
+          '$1000': 'rgba(255,215,0,0.65)'      // gold
+        };
+        function getPrizeValue(block) {
+          const name = block.getAttribute('data-name') || '';
+          if (name.includes('1000')) return '$1000';
+          if (name.includes('500')) return '$500';
+          if (name.includes('200')) return '$200';
+          if (name.includes('100')) return '$100';
+          if (name.includes('50')) return '$50';
+          if (name.includes('20')) return '$20';
+          return '$50';
+        }
+        for (let i = 0; i < n; i++) {
+          const row = Math.floor(i / grid);
+          const col = i % grid;
+          const delay = (row + col) * 80;
+          delayMap.push({ idx: i, delay });
+          if (delay > maxDelay) maxDelay = delay;
+        }
+        delayMap.sort((a, b) => a.delay - b.delay || a.idx - b.idx);
+        delayMap.forEach(({ idx, delay }) => {
+          setTimeout(() => {
+            const block = blocks[idx];
+            const prize = getPrizeValue(block);
+            block.classList.add('prize-preview', 'prize-preview-' + prize.replace('$', ''));
+            setTimeout(() => {
+              block.classList.remove('prize-preview', 'prize-preview-' + prize.replace('$', ''));
+            }, 420);
+          }, delay);
+        });
+        console.log(`Sweep animation started, duration: ${maxDelay + 420}ms`);
+        return maxDelay + 420;
       }
 
       // Function to populate prize blocks
       function populatePrizeBlocks() {
-        const group = getGroupFromURL();
-        const prizes = prizeSets[group] || prizeSets.default;
+        const groupKey = getCurrentGroupKey();
+        const prizes = prizeSets[groupKey] || prizeSets.default;
         const container = document.getElementById('blocks-container');
-        container.innerHTML = ''; // Clear existing blocks
+        container.innerHTML = '';
         prizes.forEach(prize => {
           const block = document.createElement('div');
           block.className = 'block';
@@ -210,10 +214,53 @@
           block.textContent = prize.display;
           container.appendChild(block);
         });
+        setTimeout(() => {
+          const sweepDuration = sweepPrizeBlocks();
+          setTimeout(() => {
+            console.log('Delay period started (4 seconds)');
+            setTimeout(() => {
+              console.log('Starting pre-drawing animation');
+              if (window.blocksLottery && window.blocksLottery.startPreDrawingAnimation) {
+                window.blocksLottery.startPreDrawingAnimation();
+              } else {
+                console.warn('startPreDrawingAnimation not found, falling back to default animation');
+                const blocks = document.querySelectorAll('.block');
+                blocks.forEach(block => block.classList.add('highlight'));
+                setTimeout(() => blocks.forEach(block => block.classList.remove('highlight')), 1000);
+              }
+            }, 4000);
+          }, sweepDuration);
+        }, 80);
       }
 
       // Populate prize blocks on page load
       document.addEventListener('DOMContentLoaded', populatePrizeBlocks);
+
+      // Add the CSS for .prize-preview, .delay-indicator, and keyframes
+      (function injectPrizePreviewCSS() {
+        if (document.getElementById('prize-preview-css')) return;
+        const style = document.createElement('style');
+        style.id = 'prize-preview-css';
+        style.textContent = `
+          .block.prize-preview { z-index: 2; transform: scale(1.08) rotate(-2deg); animation: prizePreviewGlow 0.45s cubic-bezier(0.4,0,0.2,1); }
+          .block.prize-preview-20 { box-shadow: 0 0 24px 8px rgba(66,165,245,0.55), 0 0 0 4px #e3f2fd; }
+          .block.prize-preview-50 { box-shadow: 0 0 24px 8px rgba(102,187,106,0.55), 0 0 0 4px #e8f5e9; }
+          .block.prize-preview-100 { box-shadow: 0 0 24px 8px rgba(239,68,68,0.55), 0 0 0 4px #ffebee; }
+          .block.prize-preview-200 { box-shadow: 0 0 24px 8px rgba(156,39,176,0.55), 0 0 0 4px #f3e5f5; }
+          .block.prize-preview-500 { box-shadow: 0 0 24px 8px rgba(249,115,22,0.55), 0 0 0 4px #ffedd5; }
+          .block.prize-preview-1000 { box-shadow: 0 0 24px 8px rgba(255,215,0,0.65), 0 0 0 4px #fff8c6; }
+          .container.delay-indicator {
+            box-shadow: 0 0 40px 12px rgba(255, 215, 0, 0.7), inset 0 0 15px rgba(255, 215, 0, 0.5);
+            transition: box-shadow 0.5s ease;
+          }
+          @keyframes prizePreviewGlow {
+            0% { transform: scale(1) rotate(0deg); }
+            60% { transform: scale(1.12) rotate(-3deg); }
+            100% { transform: scale(1.08) rotate(-2deg); }
+          }
+        `;
+        document.head.appendChild(style);
+      })();
     </script>
     <script src="js/blocks.js"></script>
     <script src="js/sales-lottery.js"></script>
