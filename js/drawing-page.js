@@ -1,4 +1,3 @@
-// Drawing Page Logic
 document.addEventListener('DOMContentLoaded', () => {
     class DrawingPage {
         constructor() {
@@ -67,14 +66,19 @@ document.addEventListener('DOMContentLoaded', () => {
             setTimeout(startPreAnimation, 500);
         }
         goBackToSelection() {
-        // Clear stored player data
-        localStorage.removeItem('selectedPlayer');
-        
-        // Navigate back to selection page
-        window.location.href = 'index.html';
+            // Preserve the selected group ID in localStorage
+            if (this.playerData && this.playerData.groupId) {
+                localStorage.setItem('selectedGroupId', this.playerData.groupId);
+            }
+            
+            // Clear stored player data
+            localStorage.removeItem('selectedPlayer');
+            
+            // Navigate back to selection page
+            window.location.href = 'index.html';
+        }
     }
-    } // Closing brace for DrawingPage class
 
     // Instantiate DrawingPage after DOM is ready (inside DOMContentLoaded)
     new DrawingPage();
-}); // End of DOMContentLoaded wrapper
+});
