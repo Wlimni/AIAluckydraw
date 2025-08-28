@@ -66,9 +66,6 @@ aia-lucky-draw-wheel/
 ├── assets/
 │   ├── pic/
 │   │   ├── aialogo.jpeg        # AIA corporate logo
-│   │   ├── step1.png           # Screenshot: Step 1 (Group selection)
-│   │   ├── step2.png           # Screenshot: Step 2 (Player selection)
-│   │   └── drawing.png         # Screenshot: Drawing animation
 │   └── info/
 │       ├── 20250811 Lucky Money for Special Districts_Final.xlsm  # Master Excel (source data)
 │       └── extracted_data.json # Preset results, group/player/prize data
