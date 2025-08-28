@@ -1,32 +1,17 @@
 # AIA Lucky Draw System 🎰
 
-A professional, interactive lottery system designed for AIA Insurance sales incentive programs. Features spectacular animations, preset results, and real-time prize tracking.
+<p align="center">
+    <img src="assets/pic/aialogo.jpeg" alt="AIA Logo" width="120" />
+</p>
 
-![AIA Lucky Draw](https://img.shields.io/badge/AIA-Lucky%20Draw-red?style=for-the-badge)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge&logo=javascript)
-![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+<p align="center">
+    <img src="https://img.shields.io/badge/AIA-Lucky%20Draw-red?style=for-the-badge">
+    <img src="https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge&logo=javascript">
+    <img src="https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white">
+    <img src="https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white">
+</p>
 
-## 🎯 Features
-
-### 🎮 Interactive Lottery System
-- **9 Prize Blocks**: 6×$50, 2×$100, 1×$500 cash prizes
-- **Real-time Animations**: Spectacular button explosions, light rays, and confetti
-- **Golden Results Box**: Live counter updates with permanent glow effects
-- **Player Management**: Support for 6 insurance sales workers with individual ticket counts
-
-### 🎨 Visual Effects
-- **Button Explosion**: 25 colorful bubble particles when starting lottery
-- **Light Ray Explosions**: Dramatic red ray animations shooting to the sky
-- **Confetti System**: Large emoji (32px) and ribbon confetti falling from top
-- **Cash Animations**: Money emoji circles around total winnings (120px+ radius)
-- **Permanent Glow**: Summary box glows continuously with golden effects
-
-### 💼 Business Features
-- **Preset Results**: Customizable predetermined outcomes for each worker
-- **Ticket System**: Workers get tickets based on insurance sales numbers
-- **Prize Tracking**: Real-time counter updates and total winnings calculation
-- **Corporate Branding**: AIA logo with transparent background in top-right corner
+---
 
 ## 🚀 Quick Start
 
@@ -35,214 +20,199 @@ A professional, interactive lottery system designed for AIA Insurance sales ince
 - Local web server (optional, for development)
 
 ### Installation
+Clone the repository:
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/yourusername/AIAluckydraw.git
-   cd AIAluckydraw
-   ```
-
-2. **Open in browser**
-   ```bash
-   # Option 1: Direct file opening
-   open index.html
-   
-   # Option 2: Local server (recommended)
-   python -m http.server 8000
-   # Then visit http://localhost:8000
-   ```
-
-3. **Start using**
-   - Select a player from the dropdown
-   - Click "Draw All Tickets!" to begin the lottery
-   - Enjoy the spectacular animations!
-
-## 📁 Project Structure
-
-```
-aia-lucky-draw-wheel/
-├── index.html              # Main HTML file
-├── css/
-│   └── styles.css          # All styling and animations
-├── js/
-│   └── sales-lottery.js    # Main lottery logic and animations
-├── assets/
-│   ├── pic/
-│   │   └── aialogo.jpeg    # AIA corporate logo
-│   └── audio/              # Sound effects (optional)
-└── README.md               # This file
+```bash
+git clone https://github.com/yourusername/AIAluckydraw.git
+cd AIAluckydraw
 ```
 
-## 🎲 How It Works
+### Open in browser
 
-### Player Configuration
-Each worker has predefined tickets based on their sales performance:
-- **John Smith**: 25 tickets
-- **Mary Johnson**: 63 tickets  
-- **David Lee**: 12 tickets
-- **Sarah Wilson**: 45 tickets
-- **Mike Brown**: 8 tickets
-- **Lisa Davis**: 32 tickets
-
-### Prize Distribution
-- **$50 Cash Prize**: 67% probability (6/9 blocks)
-- **$100 Cash Prize**: 22% probability (2/9 blocks)
-- **$500 Cash Prize**: 11% probability (1/9 blocks)
-
-### Preset Results System
-The system uses predetermined results to ensure fair and controlled outcomes:
-
-```javascript
-// Example preset for John Smith (25 tickets)
-'john-25': {
-    '$50 Cash Prize': 20,   // 20x $50 = $1,000
-    '$100 Cash Prize': 4,   // 4x $100 = $400  
-    '$500 Cash Prize': 1    // 1x $500 = $500
-}
-// Total: $1,900 winnings
+**Option 1: Direct file opening**
+```bash
+open index.html
 ```
 
-## 🎨 Customization
-
-### Changing Player Data
-Edit the `players` object in `sales-lottery.js`:
-```javascript
-this.players = {
-    'new-player': { 
-        name: 'New Player Name', 
-        tickets: 30, 
-        remaining: 30, 
-        totalWinnings: 0 
-    }
-};
+**Option 2: Local server (recommended)**
+```bash
+python -m http.server 8000
+# Then visit http://localhost:8000
 ```
 
-### Modifying Preset Results
-Update the `presetResults` object:
-```javascript
-this.presetResults = {
-    'new-player': {
-        '$50 Cash Prize': 25,
-        '$100 Cash Prize': 4,
-        '$500 Cash Prize': 1
-    }
-};
-```
-
-### Styling Customization
-Modify `styles.css` for:
-- Color schemes
-- Animation timing
-- Visual effects intensity
-- Layout adjustments
-
-## 🎬 Animation Features
-
-### Button Explosion
-- 25 colorful bubble particles
-- Red, gold, and white theme colors
-- 360-degree explosion pattern
-- Staggered timing for natural effect
-
-### Light Ray Effects
-- Dramatic red rays shooting to the sky
-- Smooth 12-keyframe animations
-- Pulsing red energy bursts
-- 2-second excitement period
-
-### Confetti System
-- Large 32px emoji for high visibility
-- Money and celebration themed
-- Realistic physics with drift
-- Multiple burst patterns
-
-### Cash Animations
-- 120px+ radius to avoid covering numbers
-- Money emoji themed (💰💵💸💲)
-- Circular explosion patterns
-- Coordinated with total winnings updates
-
-## 🏢 Corporate Integration
-
-### AIA Branding
-- Logo positioned in top-right corner
-- Transparent background with glass-morphism
-- Red accent colors matching AIA brand
-- Professional typography and spacing
-
-### Business Logic
-- Insurance sales-based ticket allocation
-- Guaranteed monetary prizes for every ticket
-- Detailed prize tracking and reporting
-- Enterprise-ready preset result system
-
-## 🛠️ Technical Details
-
-### Technologies Used
-- **HTML5**: Semantic structure and accessibility
-- **CSS3**: Advanced animations and glass-morphism effects
-- **Vanilla JavaScript**: ES6+ classes and modern syntax
-- **CSS Grid/Flexbox**: Responsive layout system
-
-### Performance Optimizations
-- Hardware-accelerated animations
-- Efficient DOM manipulation
-- Optimized confetti particle system
-- Smooth 60fps animations
-
-### Browser Compatibility
-- Chrome 80+
-- Firefox 75+
-- Safari 13+
-- Edge 80+
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-## 📞 Support
-
-If you encounter any issues or have questions:
-- Open an issue on GitHub
-- Check the troubleshooting section below
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-**Animation not working smoothly:**
-- Ensure hardware acceleration is enabled in browser
-- Close unnecessary browser tabs
-- Update to latest browser version
-
-**Confetti not appearing:**
-- Check browser console for JavaScript errors
-- Ensure all files are properly loaded
-- Verify file paths are correct
-
-**Logo not displaying:**
-- Check if `assets/pic/aialogo.jpeg` exists
-- Verify file permissions
-- Ensure image file is not corrupted
-
-## 📊 Statistics
-
-- **Total Lines of Code**: ~1,200
-- **Animation Keyframes**: 15+
-- **Interactive Elements**: 9 prize blocks + UI controls
-- **Preset Configurations**: 6 workers with custom results
-- **Visual Effects**: 8 different animation systems
+### Start using
+- Select a player from the dropdown
+- Click "Draw All Tickets!" to begin the lottery
+- Enjoy the spectacular animations!
 
 ---
 
-**Made with ❤️ for AIA Insurance Sales Team**
+## 📸 Quick Preview
 
-*Professional lottery system designed to incentivize and celebrate sales achievements.*
+<p align="center">
+    <img src="assets/pic/step1.png" alt="Step 1 - Group Selection" width="320" style="margin:8px;box-shadow:0 4px 24px #eaeaea;border-radius:12px;">
+    <img src="assets/pic/step2.png" alt="Step 2 - Player Selection" width="320" style="margin:8px;box-shadow:0 4px 24px #eaeaea;border-radius:12px;">
+    <img src="assets/pic/drawing.png" alt="Drawing Animation" width="320" style="margin:8px;box-shadow:0 4px 24px #eaeaea;border-radius:12px;">
+</p>
+
+---
+
+## 📁 Project Structure
+
+
+```
+aia-lucky-draw-wheel/
+├── index.html                  # Main selection page (Step 1 & 2)
+├── drawing.html                # Drawing/lottery animation page
+├── css/
+│   └── styles.css              # All styling, themes, and animations
+├── js/
+│   ├── app.js                  # Page initialization and integration
+│   ├── blocks.js               # Block animation and highlight logic
+│   ├── drawing-page.js         # Drawing page player logic
+│   ├── player-selection.js     # Two-step selection, search, filter, navigation
+│   └── sales-lottery.js        # Main lottery logic, preset results, state
+├── assets/
+│   ├── pic/
+│   │   ├── aialogo.jpeg        # AIA corporate logo
+│   │   ├── step1.png           # Screenshot: Step 1 (Group selection)
+│   │   ├── step2.png           # Screenshot: Step 2 (Player selection)
+│   │   └── drawing.png         # Screenshot: Drawing animation
+│   └── info/
+│       ├── 20250811 Lucky Money for Special Districts_Final.xlsm  # Master Excel (source data)
+│       └── extracted_data.json # Preset results, group/player/prize data
+├── simple_extract.py           # Script to extract data from Excel to JSON
+├── README.md                   # This file
+└── ... (other docs, configs)
+```
+
+---
+
+A professional, interactive lottery system for AIA Insurance sales incentive programs. Features spectacular animations, preset results, and perfectly reliable prize tracking.
+
+![AIA Lucky Draw](https://img.shields.io/badge/AIA-Lucky%20Draw-red?style=for-the-badge)
+![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-yellow?style=for-the-badge&logo=javascript)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+
+
+## ✨ Features
+
+- **Two-Step Selection Process**: 
+    - **Step 1**: Select a Family/Group (with search/filter and statistics)
+    - **Step 2**: Select an Agent/Player (with search, filter, and pagination)
+- **Group-Specific Prize Pools**: Each group/family has its own prize block layout, as defined in the code and `drawing.html`.
+- **Preset & Customizable Results**: All results and prize distributions are loaded from `extracted_data.json`, generated from the master Excel file. The system is fully data-driven and can be customized for any event or group structure.
+- **Modern, Responsive UI/UX**: 
+    - Glassmorphism, gradients, and advanced CSS keyframes
+    - Mobile-friendly and accessible
+    - Corporate branding (AIA logo, color themes)
+- **Rich Animations**: 
+    - Confetti, button explosion, block highlight, and pre-draw patterns
+    - Animated prize block sweeps and winner reveals
+- **Stateful Navigation**: 
+    - Returning from the drawing page brings you back to Step 2 with the last family/group preselected
+    - State is managed via `localStorage` for seamless user experience
+- **Technical Stack**: 
+    - HTML5, CSS3, Vanilla JS (ES6+)
+    - Modular JS: `sales-lottery.js`, `blocks.js`, `app.js`, `drawing-page.js`, `player-selection.js`
+    - Data: `extracted_data.json` (generated from Excel)
+    - All assets and styles are self-contained
+
+---
+
+
+---
+
+## 🕹️ How It Works
+
+1. **Player Selection (`index.html`)**
+        - **Step 1**: Choose a Family/Group from a searchable, filterable list. Each group shows total workers and tickets.
+        - **Step 2**: Choose an Agent/Player from the selected group. Search, filter, and pagination are supported for large groups.
+        - **Proceed**: After selecting a player, click "Proceed to Drawing!" to move to the drawing page.
+
+2. **Drawing Page (`drawing.html`)**
+        - **Prize Blocks**: The prize block layout is determined by the selected group (see `drawing.html` for group-specific layouts).
+        - **Draw Animation**: Press the draw button to animate all tickets and reveal prizes in sequence, with confetti and fireworks.
+        - **Results Summary**: After the draw, a summary of all prizes and total winnings is shown.
+        - **Navigation**: "Draw Another Player" or "Back to Selection" returns you to Step 2, with the last family/group preselected.
+
+3. **Data & Customization**
+        - All group, player, and prize data is loaded from `extracted_data.json`, which is generated from the master Excel file using `simple_extract.py`.
+        - Prize pools and layouts for each group are defined in `drawing.html` and can be customized as needed.
+
+---
+
+
+---
+
+## 🛠️ Customization & Extensibility
+
+- **To update groups/players/prizes**: Edit the Excel file and regenerate `extracted_data.json` using `simple_extract.py`.
+- **To change prize layouts**: Edit the `prizeSets` object in `drawing.html`.
+- **To change UI/UX**: Edit `css/styles.css` and the relevant HTML/JS files.
+
+---
+
+
+---
+
+## 🧩 Technical Overview
+
+- **HTML**: `index.html` (selection UI), `drawing.html` (drawing UI)
+- **CSS**: `css/styles.css` (all theming, responsive design, and animations)
+- **JS**:
+    - `player-selection.js`: Handles two-step selection, search, filter, pagination, and navigation logic
+    - `drawing-page.js`: Handles player info, navigation, and pre-animation on drawing page
+    - `sales-lottery.js`: Main lottery logic, preset result loading, sequential animation, state, and counters
+    - `blocks.js`: Block animation and highlight logic
+    - `app.js`: Page initialization and integration
+- **Data**: `extracted_data.json` (all group/player/prize data)
+- **Assets**: AIA logo, fonts, and images in `assets/`
+
+---
+
+
+---
+
+## 🎲 Example Prize Block Layouts (from `drawing.html`)
+
+Prize blocks are defined per group, e.g.:
+
+```js
+const prizeSets = {
+    group1: [
+        { name: "$50 Cash Prize", display: "$50 Cash" },
+        { name: "$100 Cash Prize", display: "💵 $100 Cash" },
+        ...
+    ],
+    group24: [...],
+    group25: [...],
+    // ...
+    default: [...]
+};
+```
+
+---
+
+
+---
+
+## 🏁 Running & Customizing
+
+1. Open `index.html` in a browser to start the selection process.
+2. Select a family/group, then an agent/player, and proceed to the drawing page.
+3. To update data, regenerate `extracted_data.json` using the provided Python script and your Excel file.
+4. All UI/UX and logic can be customized via the modular JS and CSS files.
+
+---
+
+
+---
+
+## 🙌 Credits
+
+- Developed for AIA Corporate Solutions
+- UI/UX: Modern, glassmorphism, responsive, and event-ready
+- Animations: Confetti, fireworks, button explosion, and more
+- Data-driven, fully customizable, and suitable for real-world events
