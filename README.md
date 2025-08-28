@@ -45,15 +45,6 @@ python -m http.server 8000
 - Click "Draw All Tickets!" to begin the lottery
 - Enjoy the spectacular animations!
 
----
-
-## 📸 Quick Preview
-
-<p align="center">
-    <img src="assets/pic/step1.png" alt="Step 1 - Group Selection" width="320" style="margin:8px;box-shadow:0 4px 24px #eaeaea;border-radius:12px;">
-    <img src="assets/pic/step2.png" alt="Step 2 - Player Selection" width="320" style="margin:8px;box-shadow:0 4px 24px #eaeaea;border-radius:12px;">
-    <img src="assets/pic/drawing.png" alt="Drawing Animation" width="320" style="margin:8px;box-shadow:0 4px 24px #eaeaea;border-radius:12px;">
-</p>
 
 ---
 
