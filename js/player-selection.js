@@ -24,9 +24,11 @@ document.addEventListener('DOMContentLoaded', () => {
                 groupStep.style.display = 'block';
             }
             
-            // Check for previously selected group (returning from drawing page)
+            // Check if returning from drawing page
             const storedGroupId = localStorage.getItem('selectedGroupId');
-            if (storedGroupId && this.groupData[storedGroupId]) {
+            const isReturning = document.referrer.includes('drawing.html');
+            
+            if (isReturning && storedGroupId && this.groupData[storedGroupId]) {
                 this.isReturningFromDrawing = true; // Set flag for return behavior
                 this.selectedGroup = storedGroupId;
                 const group = this.groupData[storedGroupId];
@@ -39,9 +41,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 this.showPlayerStep(group);
                 this.populatePlayerGrid(group);
             } else {
-                // Initial load: ensure page starts at top (Step 1) with no scroll
+                // First-time load: clear selectedGroupId and start at top
+                localStorage.removeItem('selectedGroupId');
                 window.scrollTo({ top: 0, behavior: 'instant' });
-                console.log('Initial load, scrollY:', window.scrollY);
+                console.log('First-time load, scrollY:', window.scrollY);
             }
             
             this.setupEventListeners();
